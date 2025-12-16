@@ -68,6 +68,37 @@
 - 入口點有多個步驟 → 步驟是入口點的**子書籤**
 - 調用者 → 被調用者 = 父書籤 → 子書籤
 
+**重要: 調用位置 vs 定義位置** (Call Site vs Definition):
+- 標記代碼流程時, 應該標記**調用位置** (call site), 而不是函數定義位置
+- 這樣才能形成清晰的執行路徑
+
+```
+錯誤示例 (標記函數定義, 無法追蹤流程):
+1. main.go:10      (main 定義)
+2. handler.go:50   (handleRequest 定義)
+3. validator.go:20 (validate 定義)
+
+正確示例 (標記調用位置, 清晰的執行流程):
+1. main.go:15         (main 調用 handleRequest 的位置)
+  1.1 handler.go:55   (handleRequest 調用 validate 的位置)
+  1.2 handler.go:60   (handleRequest 調用 process 的位置)
+```
+
+**重要: Title 必須描述動作, 而不是函數名**:
+- title 應該描述**這行代碼在做什麼**, 而不是簡單寫函數名
+- 函數名本身沒有意義, 用戶需要知道這行代碼的作用
+
+```
+錯誤示例 (只寫函數名, 沒有意義):
+- title: "validateBet" ❌
+- title: "processPayment" ❌
+
+正確示例 (描述動作/作用):
+- title: "驗證下注金額和用戶餘額" ✓
+- title: "從用戶錢包扣除下注金額" ✓
+- title: "檢查遊戲狀態是否允許下注" ✓
+```
+
 ## 項目結構
 
 ```

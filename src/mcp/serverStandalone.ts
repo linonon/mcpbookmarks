@@ -36,28 +36,51 @@ const TOOLS: Tool[] = [
     name: 'add_bookmark',
     description: `Add a bookmark to a group. Bookmarks mark important code locations with explanations. Supports hierarchical bookmarks via parentId.
 
-**IMPORTANT - Formatting Guidelines for AI:**
-- title: Short, concise identifier (e.g., "handlePlaceBetRequest" or "下注核心入口")
-- description: Detailed explanation WITHOUT repeating the title. Use clear formatting:
-  - Start with a brief summary sentence
-  - Use numbered steps for flows: "1) step one 2) step two"
-  - Keep it focused and readable
+**CRITICAL - Location Guidelines (CALL SITE vs DEFINITION):**
+- For call chain/flow analysis: Mark the CALL SITE (where function is called), NOT the function definition
+- This creates a clear traceable path through the code
 
-**Example:**
-- title: "handlePlaceBetRequest"
-- description: "下注核心逻辑入口. 流程: 1) validatePlaceBetRequest 验证 2) CreateInitialBetOrder 创建订单 3) processWalletDebit 扣款"
+**WRONG - Marking function definitions (no clear flow):**
+\`\`\`
+1. main.go:10      (main definition)
+2. handler.go:50   (handleRequest definition)
+3. validator.go:20 (validate definition)
+\`\`\`
 
-DO NOT include the title text in the description - it will be displayed separately.
+**CORRECT - Marking call sites (clear execution flow):**
+\`\`\`
+1. main.go:15         (where main calls handleRequest)
+  1.1 handler.go:55   (where handleRequest calls validate)
+  1.2 handler.go:60   (where handleRequest calls process)
+\`\`\`
+
+**IMPORTANT - Title Guidelines (DESCRIBE THE ACTION, NOT THE FUNCTION NAME):**
+- title: Describe WHAT THIS LINE DOES, not just the function name
+- Function names alone are meaningless! Explain the PURPOSE/ACTION
+
+**WRONG titles (just function names, meaningless):**
+- "validateBet" ❌
+- "processPayment" ❌
+- "handleRequest" ❌
+
+**CORRECT titles (describe what happens at this line):**
+- "验证下注金额和用户余额" ✓
+- "从用户钱包扣除下注金额" ✓
+- "检查游戏状态是否允许下注" ✓
+
+**Example bookmark:**
+- location: handler.go:55
+- title: "调用验证逻辑检查下注合法性"
+- description: "在处理下注前先验证: 1) 用户余额是否足够 2) 下注金额是否在限额内 3) 游戏是否在下注阶段"
 
 **HIERARCHY GUIDELINES - When to create child bookmarks (use parentId or add_child_bookmark):**
-- Function A calls Function B → B should be CHILD of A
-- Entry point with multiple steps → steps are CHILDREN of entry point
-- High-level concept with implementation details → details are CHILDREN
-- Caller → Callee relationship = Parent → Child relationship
+- Function A calls Function B → B should be CHILD of A, marked at the CALL LINE in A
+- Entry point with multiple steps → steps are CHILDREN, each marked at call site
+- Caller → Callee = Parent → Child, location = call site in parent
 
 **DO NOT flatten call chains into siblings with order 1, 2, 3!**
 WRONG: 1. handleRequest, 2. validateInput, 3. processData (all siblings)
-CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child) → 1.2 processData (child)`,
+CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child at call site) → 1.2 processData (child at call site)`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -75,11 +98,11 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child) → 1.2 process
         },
         title: {
           type: 'string',
-          description: 'Short title (5-30 chars). DO NOT repeat in description.'
+          description: 'Describe the ACTION/PURPOSE of this line (e.g., "验证用户余额"), NOT just function name!'
         },
         description: {
           type: 'string',
-          description: 'Detailed explanation. DO NOT include title. Use: brief summary + numbered steps for flows.'
+          description: 'Detailed explanation of what this code does and why it matters.'
         },
         order: {
           type: 'number',
@@ -103,18 +126,23 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child) → 1.2 process
     name: 'add_child_bookmark',
     description: `Add a child bookmark under an existing bookmark. Creates hierarchical structure.
 
+**CRITICAL - Location = CALL SITE in parent function:**
+- The location should be WHERE the child function is CALLED (inside the parent)
+- NOT the definition of the child function
+
+**Example - Correct call site marking:**
+\`\`\`
+Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry call)
+  Child: "validateInput" at handler.go:55  <- line where validateInput() is called
+  Child: "processData" at handler.go:60    <- line where processData() is called
+\`\`\`
+
 **USE THIS TOOL when the new bookmark represents:**
-- A function/method CALLED BY the parent bookmark's function
+- A function/method CALLED BY the parent bookmark's function (mark the call line)
 - Implementation details of the parent concept
 - A step that belongs under a parent flow
-- Code that is logically "inside" or "part of" the parent
 
-**Example scenarios:**
-- Parent: "handlePlaceBet" → Child: "validateBetAmount" (called inside parent)
-- Parent: "Authentication Flow" → Child: "Token Validation" (sub-step)
-- Parent: "Database Layer" → Child: "Connection Pool Init" (component)
-
-**Formatting:** Same as add_bookmark - title should be short, description should NOT repeat title.`,
+**Title Guidelines:** Same as add_bookmark - describe WHAT THIS LINE DOES, not just function name!`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -128,11 +156,11 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child) → 1.2 process
         },
         title: {
           type: 'string',
-          description: 'Short title (5-30 chars). DO NOT repeat in description.'
+          description: 'Describe the ACTION/PURPOSE of this line (e.g., "验证用户余额"), NOT just function name!'
         },
         description: {
           type: 'string',
-          description: 'Detailed explanation. DO NOT include title. Use: brief summary + numbered steps for flows.'
+          description: 'Detailed explanation of what this code does and why it matters.'
         },
         order: {
           type: 'number',

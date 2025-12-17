@@ -188,10 +188,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
   // Reveal bookmark in sidebar (for CodeLens click)
   context.subscriptions.push(
     vscode.commands.registerCommand('aiBookmarks.revealBookmark', (bookmark: Bookmark, _group: BookmarkGroup) => {
-      // Refresh sidebar to ensure the bookmark is visible
-      sidebarProvider?.refresh();
-      // Open detail panel for the bookmark
-      detailProvider?.showBookmarkDetail(bookmark.id);
+      // Focus and highlight the bookmark in sidebar
+      sidebarProvider?.revealBookmark(bookmark.id);
     })
   );
 

@@ -119,6 +119,19 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
   }
 
   /**
+   * 聚焦到指定书签 (用于 CodeLens 点击)
+   */
+  public revealBookmark(bookmarkId: string): void {
+    if (!this._view) {
+      return;
+    }
+    this._view.webview.postMessage({
+      type: 'revealBookmark',
+      bookmarkId
+    });
+  }
+
+  /**
    * 处理来自 Webview 的消息
    */
   private async handleMessage(message: {
@@ -127,17 +140,12 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
     groupId?: string;
     expanded?: boolean;
     query?: string;
+    message?: string;
   }): Promise<void> {
     switch (message.type) {
       case 'jumpToBookmark':
         if (message.bookmarkId) {
           await this.jumpToBookmark(message.bookmarkId);
-        }
-        break;
-
-      case 'openDetail':
-        if (message.bookmarkId) {
-          vscode.commands.executeCommand('aiBookmarks.openBookmarkDetail', message.bookmarkId);
         }
         break;
 
@@ -194,7 +202,13 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
 
       case 'editBookmark':
         if (message.bookmarkId) {
-          vscode.commands.executeCommand('aiBookmarks.editBookmark', { id: message.bookmarkId });
+          const editResult = this.bookmarkStore.getBookmark(message.bookmarkId);
+          if (editResult) {
+            vscode.commands.executeCommand('aiBookmarks.editBookmark', {
+              type: 'bookmark',
+              bookmark: editResult.bookmark
+            });
+          }
         }
         break;
 
@@ -207,6 +221,22 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
       case 'ready':
         // Webview 已加载完成, 发送初始数据
         this.refresh();
+        break;
+
+      case 'showInfo':
+        if (message.message) {
+          vscode.window.showInformationMessage(message.message as string);
+        }
+        break;
+
+      case 'createGroup':
+        // 创建新分组
+        vscode.commands.executeCommand('aiBookmarks.createGroup');
+        break;
+
+      case 'exportBookmarks':
+        // 导出书签
+        vscode.commands.executeCommand('aiBookmarks.exportMarkdown');
         break;
 
       default:

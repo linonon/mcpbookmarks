@@ -20,11 +20,15 @@
   const searchResults = document.getElementById('search-results');
   const contextMenu = document.getElementById('context-menu');
 
+  // Header buttons
+  const btnNewGroup = document.getElementById('btn-new-group');
+  const btnToggleAll = document.getElementById('btn-toggle-all');
+  const btnExport = document.getElementById('btn-export');
+
   // State
   let currentData = { groups: [], viewMode: 'group' };
   let collapsedGroups = new Set();
   let collapsedBookmarks = new Set();
-  let clickTimer = null;
   let contextMenuTarget = null;
 
   // 初始化
@@ -39,6 +43,23 @@
     // 搜索输入
     searchInput.addEventListener('input', debounce(handleSearch, 300));
     clearSearchBtn.addEventListener('click', clearSearch);
+
+    // Header buttons
+    if (btnNewGroup) {
+      btnNewGroup.addEventListener('click', () => {
+        vscode.postMessage({ type: 'createGroup' });
+      });
+    }
+
+    if (btnToggleAll) {
+      btnToggleAll.addEventListener('click', handleToggleAll);
+    }
+
+    if (btnExport) {
+      btnExport.addEventListener('click', () => {
+        vscode.postMessage({ type: 'exportBookmarks' });
+      });
+    }
 
     // 全局点击 (关闭 context menu)
     document.addEventListener('click', () => {
@@ -63,6 +84,17 @@
         break;
       case 'searchResults':
         handleSearchResults(message.data);
+        break;
+      case 'expandAll':
+        expandAllGroups();
+        break;
+      case 'collapseAll':
+        collapseAllGroups();
+        break;
+      case 'revealBookmark':
+        if (message.bookmarkId) {
+          revealBookmark(message.bookmarkId);
+        }
         break;
     }
   });
@@ -217,6 +249,7 @@
     document.querySelectorAll('.group-header').forEach(header => {
       header.addEventListener('click', (e) => {
         e.stopPropagation();
+        hideContextMenu(); // 关闭可能打开的右键菜单
         const groupId = header.getAttribute('data-group-id');
         toggleGroup(groupId);
       });
@@ -235,6 +268,7 @@
     document.querySelectorAll('.bookmark-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
+        hideContextMenu(); // 关闭可能打开的右键菜单
         const bookmarkId = item.getAttribute('data-bookmark-id');
         const hasChildren = item.classList.contains('has-children');
 
@@ -244,19 +278,8 @@
           return;
         }
 
-        // 双击检测
-        if (clickTimer) {
-          clearTimeout(clickTimer);
-          clickTimer = null;
-          // 双击 - 打开详情
-          vscode.postMessage({ type: 'openDetail', bookmarkId });
-        } else {
-          clickTimer = setTimeout(() => {
-            clickTimer = null;
-            // 单击 - 跳转到代码
-            vscode.postMessage({ type: 'jumpToBookmark', bookmarkId });
-          }, 250);
-        }
+        // 单击 - 跳转到代码
+        vscode.postMessage({ type: 'jumpToBookmark', bookmarkId });
       });
 
       item.addEventListener('contextmenu', (e) => {
@@ -333,14 +356,14 @@
         <span class="codicon codicon-go-to-file"></span>
         <span>Go to Location</span>
       </div>
-      <div class="context-menu-item" data-action="openDetail">
-        <span class="codicon codicon-info"></span>
-        <span>Open Detail</span>
-      </div>
       <div class="context-menu-separator"></div>
       <div class="context-menu-item" data-action="editBookmark">
         <span class="codicon codicon-edit"></span>
         <span>Edit Bookmark</span>
+      </div>
+      <div class="context-menu-item" data-action="copyBookmarkInfo">
+        <span class="codicon codicon-copy"></span>
+        <span>Copy Info</span>
       </div>
       <div class="context-menu-separator"></div>
       <div class="context-menu-item danger" data-action="deleteBookmark">
@@ -374,6 +397,38 @@
     contextMenuTarget = null;
   }
 
+  // 查找书签 (递归搜索包括子书签)
+  function findBookmarkById(bookmarkId, bookmarks) {
+    for (const bookmark of bookmarks) {
+      if (bookmark.id === bookmarkId) {
+        return bookmark;
+      }
+      if (bookmark.children && bookmark.children.length > 0) {
+        const found = findBookmarkById(bookmarkId, bookmark.children);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
+
+  // 复制书签信息到剪贴板
+  function copyBookmarkInfo(bookmarkId) {
+    // 在所有分组中查找书签
+    for (const group of currentData.groups) {
+      const bookmark = findBookmarkById(bookmarkId, group.bookmarks || []);
+      if (bookmark) {
+        const info = `${bookmark.title}\n${bookmark.location}`;
+        navigator.clipboard.writeText(info).then(() => {
+          // 复制成功 - 可以通过 postMessage 通知 extension 显示提示
+          vscode.postMessage({ type: 'showInfo', message: 'Bookmark info copied to clipboard' });
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+        });
+        return;
+      }
+    }
+  }
+
   // 绑定 context menu 动作
   function bindContextMenuActions() {
     contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
@@ -393,14 +448,14 @@
       case 'jumpToBookmark':
         vscode.postMessage({ type: 'jumpToBookmark', bookmarkId: contextMenuTarget.id });
         break;
-      case 'openDetail':
-        vscode.postMessage({ type: 'openDetail', bookmarkId: contextMenuTarget.id });
-        break;
       case 'editBookmark':
         vscode.postMessage({ type: 'editBookmark', bookmarkId: contextMenuTarget.id });
         break;
       case 'deleteBookmark':
         vscode.postMessage({ type: 'deleteBookmark', bookmarkId: contextMenuTarget.id });
+        break;
+      case 'copyBookmarkInfo':
+        copyBookmarkInfo(contextMenuTarget.id);
         break;
       case 'editGroup':
         vscode.postMessage({ type: 'editGroup', groupId: contextMenuTarget.id });
@@ -451,11 +506,6 @@
         const bookmarkId = item.getAttribute('data-bookmark-id');
         vscode.postMessage({ type: 'jumpToBookmark', bookmarkId });
       });
-
-      item.addEventListener('dblclick', () => {
-        const bookmarkId = item.getAttribute('data-bookmark-id');
-        vscode.postMessage({ type: 'openDetail', bookmarkId });
-      });
     });
   }
 
@@ -504,6 +554,121 @@
   function truncate(str, maxLength) {
     if (!str || str.length <= maxLength) return str;
     return str.substring(0, maxLength) + '...';
+  }
+
+  // 展开全部/折叠全部切换
+  function handleToggleAll() {
+    const allCollapsed = Array.from(collapsedGroups).length === currentData.groups.length;
+
+    if (allCollapsed) {
+      expandAllGroups();
+      if (btnToggleAll) {
+        btnToggleAll.querySelector('.codicon').className = 'codicon codicon-fold';
+      }
+    } else {
+      collapseAllGroups();
+      if (btnToggleAll) {
+        btnToggleAll.querySelector('.codicon').className = 'codicon codicon-unfold';
+      }
+    }
+  }
+
+  // 展开所有分组
+  function expandAllGroups() {
+    collapsedGroups.clear();
+    document.querySelectorAll('.group-header').forEach(header => {
+      header.classList.remove('collapsed');
+    });
+    document.querySelectorAll('.bookmarks-list').forEach(list => {
+      list.classList.remove('collapsed');
+    });
+
+    // 同时展开所有书签子项
+    collapsedBookmarks.clear();
+    document.querySelectorAll('.bookmark-item').forEach(item => {
+      item.classList.remove('collapsed');
+    });
+    document.querySelectorAll('.children-list').forEach(list => {
+      list.classList.remove('collapsed');
+    });
+  }
+
+  // 折叠所有分组
+  function collapseAllGroups() {
+    currentData.groups.forEach(group => {
+      collapsedGroups.add(group.id);
+    });
+    document.querySelectorAll('.group-header').forEach(header => {
+      header.classList.add('collapsed');
+    });
+    document.querySelectorAll('.bookmarks-list').forEach(list => {
+      list.classList.add('collapsed');
+    });
+  }
+
+  // 聚焦到指定书签 (CodeLens 点击时调用)
+  /**
+   * @param {string} bookmarkId - 书签 ID
+   */
+  function revealBookmark(bookmarkId) {
+    // 1. 找到 bookmark 元素
+    const bookmarkElement = document.querySelector(`[data-bookmark-id="${bookmarkId}"]`);
+    if (!bookmarkElement) {
+      return;
+    }
+
+    // 2. 获取所属的 groupId
+    const groupId = bookmarkElement.getAttribute('data-group-id');
+    if (!groupId) {
+      return;
+    }
+
+    // 3. 展开所属的 group
+    collapsedGroups.delete(groupId);
+    const groupHeader = document.querySelector(`[data-group-id="${groupId}"].group-header`);
+    if (groupHeader && groupHeader.parentElement) {
+      groupHeader.classList.remove('collapsed');
+      const bookmarksList = groupHeader.parentElement.querySelector('.bookmarks-list');
+      if (bookmarksList) {
+        bookmarksList.classList.remove('collapsed');
+      }
+    }
+
+    // 4. 如果是子书签, 展开所有父书签
+    let currentElement = bookmarkElement;
+    while (currentElement) {
+      const parentBookmarkId = currentElement.getAttribute('data-parent-id');
+      if (!parentBookmarkId) {
+        break;
+      }
+
+      // 展开父书签
+      collapsedBookmarks.delete(parentBookmarkId);
+      const parentElement = document.querySelector(`[data-bookmark-id="${parentBookmarkId}"]`);
+      if (parentElement) {
+        parentElement.classList.remove('collapsed');
+        const childrenList = parentElement.querySelector('.children-list');
+        if (childrenList) {
+          childrenList.classList.remove('collapsed');
+        }
+        currentElement = parentElement;
+      } else {
+        break;
+      }
+    }
+
+    // 5. 移除所有其他 active 高亮
+    document.querySelectorAll('.bookmark-item.active').forEach(item => {
+      item.classList.remove('active');
+    });
+
+    // 6. 高亮当前书签
+    bookmarkElement.classList.add('active');
+
+    // 7. 滚动到书签位置
+    setTimeout(() => {
+      bookmarkElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   }
 
   // 启动

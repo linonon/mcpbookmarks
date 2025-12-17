@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Bookmarks - Improved Tree View</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap');
+    
+    body { font-family: 'Inter', sans-serif; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    
+    .vscode-bg { background: #1e1e1e; }
+    .vscode-sidebar { background: #252526; }
+    .vscode-border { border-color: #3c3c3c; }
+    .vscode-text { color: #cccccc; }
+    .vscode-text-dim { color: #858585; }
+    .vscode-accent { color: #569cd6; }
+    .vscode-hover { background: #2a2d2e; }
+    
+    /* 新的 Tree View 样式 */
+    .tree-group {
+      transition: all 0.2s ease;
+    }
+    
+    .tree-group.collapsed .group-content {
+      display: none;
+    }
+    
+    .tree-group.collapsed .chevron {
+      transform: rotate(-90deg);
+    }
+    
+    .chevron {
+      transition: transform 0.2s ease;
+    }
+    
+    .group-header {
+      transition: all 0.15s ease;
+    }
+    
+    .group-header:hover {
+      background: #2a2d2e;
+    }
+    
+    .group-header.active {
+      background: linear-gradient(90deg, #569cd620, transparent);
+      border-left: 3px solid #569cd6;
+    }
+    
+    .bookmark-item {
+      position: relative;
+      transition: all 0.15s ease;
+      border-left: 2px solid transparent;
+    }
+    
+    .bookmark-item:hover {
+      background: #2a2d2e;
+      border-left-color: #569cd640;
+    }
+    
+    .bookmark-item.active {
+      background: #2a2d2e;
+      border-left-color: #569cd6;
+    }
+    
+    .bookmark-item::before {
+      content: '';
+      position: absolute;
+      left: 16px;
+      top: 0;
+      bottom: 0;
+      width: 1px;
+      background: #3c3c3c;
+    }
+    
+    .bookmark-item:last-child::before {
+      bottom: 50%;
+    }
+    
+    .bookmark-dot {
+      position: relative;
+      z-index: 1;
+      transition: all 0.15s ease;
+    }
+    
+    .bookmark-item:hover .bookmark-dot {
+      transform: scale(1.1);
+    }
+    
+    .bookmark-item.active .bookmark-dot {
+      background: #569cd6;
+      border-color: #569cd6;
+    }
+    
+    .order-badge {
+      width: 18px;
+      height: 18px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+    }
+    
+    .bookmark-item.active .order-badge {
+      background: #569cd6;
+      color: white;
+      transform: scale(1.05);
+    }
+    
+    /* 搜索高亮 */
+    .search-highlight {
+      background: #ffd70033;
+      color: #ffd700;
+    }
+    
+    /* 分组统计 */
+    .group-stats {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      background: #3c3c3c;
+    }
+    
+    /* 空状态 */
+    .empty-state {
+      padding: 40px 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body class="vscode-bg min-h-screen">
+  <div class="flex h-screen">
+    <!-- 侧边栏 - 改进的 Tree View -->
+    <div class="w-80 vscode-sidebar border-r vscode-border flex flex-col">
+      <!-- 标题栏 -->
+      <div class="p-3 border-b vscode-border">
+        <div class="flex items-center justify-between mb-3">
+          <div class="flex items-center gap-2">
+            <i data-lucide="bookmark" class="w-4 h-4 text-blue-400"></i>
+            <span class="text-sm font-semibold vscode-text">AI BOOKMARKS</span>
+          </div>
+          <div class="flex gap-1">
+            <button class="p-1.5 rounded hover:bg-white/10 transition" title="新增分组">
+              <i data-lucide="folder-plus" class="w-4 h-4 vscode-text-dim"></i>
+            </button>
+            <button class="p-1.5 rounded hover:bg-white/10 transition" title="展开全部" id="expand-all">
+              <i data-lucide="unfold-vertical" class="w-4 h-4 vscode-text-dim"></i>
+            </button>
+            <button class="p-1.5 rounded hover:bg-white/10 transition" title="导出">
+              <i data-lucide="download" class="w-4 h-4 vscode-text-dim"></i>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 搜索栏 -->
+        <div class="relative">
+          <i data-lucide="search" class="w-3.5 h-3.5 vscode-text-dim absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+          <input type="text" 
+                 id="search-input"
+                 placeholder="搜索书签..." 
+                 class="w-full bg-[#3c3c3c] text-sm vscode-text rounded pl-8 pr-8 py-1.5 outline-none focus:ring-1 focus:ring-blue-500 transition">
+          <button class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 hover:opacity-100 transition" id="clear-search">
+            <i data-lucide="x" class="w-3.5 h-3.5 vscode-text-dim"></i>
+          </button>
+        </div>
+      </div>
+      
+
+      
+      <!-- 书签列表 -->
+      <div class="flex-1 overflow-auto" id="bookmark-tree">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+    
+    <!-- 主内容区 -->
+    <div class="flex-1 flex flex-col">
+      <div class="h-9 vscode-sidebar border-b vscode-border flex items-center px-2">
+        <div class="flex items-center gap-2 px-3 py-1 bg-[#1e1e1e] border-t-2 border-blue-500 text-sm vscode-text">
+          <i data-lucide="file-code" class="w-4 h-4"></i>
+          <span class="mono">src/game/crash.go</span>
+          <button class="ml-2 hover:bg-white/10 rounded p-0.5">
+            <i data-lucide="x" class="w-3 h-3"></i>
+          </button>
+        </div>
+      </div>
+      
+      <div class="flex-1 flex items-center justify-center vscode-text-dim">
+        <div class="text-center">
+          <i data-lucide="code-2" class="w-16 h-16 mx-auto mb-4 opacity-30"></i>
+          <p class="text-sm">点击书签查看代码位置</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bookmarkData = {
+      version: 1,
+      groups: [
+        {
+          id: "grp-001",
+          name: "Crash 游戏核心流程",
+          description: "AI 分析的游戏主循环和关键节点",
+          icon: "activity",
+          color: "blue",
+          createdAt: "2024-01-15T10:30:00Z",
+          query: "帮我理解 crash 游戏的核心逻辑流程",
+          expanded: true,
+          bookmarks: [
+            {
+              id: "bm-001",
+              order: 1,
+              location: "src/game/crash.go:45",
+              title: "游戏初始化",
+              description: "创建游戏实例，初始化 multiplier 为 1.0",
+              category: "entry-point"
+            },
+            {
+              id: "bm-002", 
+              order: 2,
+              location: "src/game/crash.go:78-92",
+              title: "下注阶段处理",
+              description: "收集玩家下注，验证余额",
+              category: "core-logic"
+            },
+            {
+              id: "bm-003",
+              order: 3,
+              location: "src/game/crash.go:105",
+              title: "生成 Crash Point",
+              description: "使用 provably fair 算法",
+              category: "core-logic"
+            },
+            {
+              id: "bm-004",
+              order: 4,
+              location: "src/game/crash.go:142-180",
+              title: "Multiplier 递增循环",
+              description: "每 100ms 更新一次 multiplier",
+              category: "core-logic"
+            },
+            {
+              id: "bm-005",
+              order: 5,
+              location: "src/game/crash.go:195",
+              title: "Crash 结算",
+              description: "触发结算逻辑",
+              category: "core-logic"
+            }
+          ]
+        },
+        {
+          id: "grp-002",
+          name: "待优化项",
+          description: "Code review 发现的问题",
+          icon: "alert-triangle",
+          color: "yellow",
+          createdAt: "2024-01-15T11:00:00Z",
+          query: "review 这段代码，找出潜在问题",
+          expanded: true,
+          bookmarks: [
+            {
+              id: "bm-006",
+              order: 1,
+              location: "src/game/crash.go:156",
+              title: "精度问题",
+              description: "float64 计算可能有误差",
+              category: "optimization"
+            },
+            {
+              id: "bm-007",
+              order: 2,
+              location: "src/game/crash.go:89",
+              title: "并发安全",
+              description: "多个 goroutine 访问 activeBets",
+              category: "bug"
+            }
+          ]
+        },
+        {
+          id: "grp-003",
+          name: "API 端点",
+          description: "HTTP 接口定义",
+          icon: "globe",
+          color: "green",
+          createdAt: "2024-01-15T12:00:00Z",
+          query: "列出所有 API 路由",
+          expanded: false,
+          bookmarks: [
+            {
+              id: "bm-008",
+              order: 1,
+              location: "src/api/routes.go:23",
+              title: "POST /api/bet",
+              description: "玩家下注接口",
+              category: "api"
+            }
+          ]
+        }
+      ]
+    };
+
+    const categoryConfig = {
+      'entry-point': { color: 'bg-purple-500/20 text-purple-400', icon: 'play-circle' },
+      'core-logic': { color: 'bg-blue-500/20 text-blue-400', icon: 'cpu' },
+      'optimization': { color: 'bg-yellow-500/20 text-yellow-400', icon: 'zap' },
+      'bug': { color: 'bg-red-500/20 text-red-400', icon: 'bug' },
+      'api': { color: 'bg-green-500/20 text-green-400', icon: 'link' },
+      'reference': { color: 'bg-gray-500/20 text-gray-400', icon: 'book-open' }
+    };
+
+    function parseLocation(loc) {
+      const match = loc.match(/:(\d+)(?:-(\d+))?$/);
+      return {
+        lineStart: match ? parseInt(match[1]) : 0,
+        lineEnd: match ? (match[2] ? parseInt(match[2]) : parseInt(match[1])) : 0
+      };
+    }
+
+    function getCategoryConfig(category) {
+      return categoryConfig[category] || categoryConfig['reference'];
+    }
+
+    function renderBookmarkTree() {
+      const container = document.getElementById('bookmark-tree');
+      
+      const html = bookmarkData.groups.map(group => {
+        const expandedClass = group.expanded ? '' : 'collapsed';
+        const bookmarkCount = group.bookmarks.length;
+        
+        return `
+          <div class="tree-group ${expandedClass} py-1" data-group-id="${group.id}">
+            <!-- 分组标题 -->
+            <div class="group-header px-3 py-2 cursor-pointer flex items-start gap-2 rounded-sm mx-1" 
+                 onclick="toggleGroup('${group.id}')">
+              <i data-lucide="chevron-down" class="chevron w-3.5 h-3.5 vscode-text-dim mt-0.5 flex-shrink-0"></i>
+              <i data-lucide="${group.icon}" class="w-4 h-4 text-${group.color}-400 mt-0.5 flex-shrink-0"></i>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-0.5">
+                  <span class="text-sm font-medium vscode-text truncate">${group.name}</span>
+                  <span class="group-stats vscode-text-dim">${bookmarkCount}</span>
+                </div>
+                ${group.query ? `
+                  <div class="text-xs vscode-text-dim truncate" title="${group.query}">
+                    <i data-lucide="message-circle" class="w-3 h-3 inline mr-1"></i>${group.query}
+                  </div>
+                ` : ''}
+              </div>
+            </div>
+            
+            <!-- 书签列表 -->
+            <div class="group-content">
+              ${group.bookmarks.map(bm => {
+                const loc = parseLocation(bm.location);
+                const config = getCategoryConfig(bm.category);
+                
+                return `
+                  <div class="bookmark-item pl-8 pr-3 py-2 cursor-pointer" 
+                       data-bookmark-id="${bm.id}"
+                       data-group-id="${group.id}"
+                       onclick="selectBookmark('${bm.id}', '${group.id}')">
+                    <div class="flex items-start gap-2">
+                      <!-- 序号 -->
+                      <div class="order-badge bg-[#3c3c3c] text-blue-400 flex-shrink-0">
+                        ${bm.order}
+                      </div>
+                      
+                      <!-- 内容 -->
+                      <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                          <i data-lucide="${config.icon}" class="w-3.5 h-3.5 ${config.color.split(' ')[1]} flex-shrink-0"></i>
+                          <span class="text-sm vscode-text truncate flex-1">${bm.title}</span>
+                        </div>
+                        <div class="flex items-center gap-2 text-xs">
+                          <span class="mono vscode-text-dim">:${loc.lineStart}${loc.lineEnd !== loc.lineStart ? '-' + loc.lineEnd : ''}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+      
+      container.innerHTML = html;
+      lucide.createIcons();
+    }
+
+    function toggleGroup(groupId) {
+      const group = document.querySelector(`[data-group-id="${groupId}"]`);
+      group.classList.toggle('collapsed');
+      
+      // 更新数据
+      const groupData = bookmarkData.groups.find(g => g.id === groupId);
+      if (groupData) {
+        groupData.expanded = !group.classList.contains('collapsed');
+      }
+    }
+
+    function selectBookmark(bookmarkId, groupId) {
+      // 移除所有激活状态
+      document.querySelectorAll('.bookmark-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      
+      // 激活当前项
+      const item = document.querySelector(`.bookmark-item[data-bookmark-id="${bookmarkId}"]`);
+      if (item) {
+        item.classList.add('active');
+      }
+      
+      console.log('Selected bookmark:', bookmarkId, 'in group:', groupId);
+    }
+
+    // 展开/折叠全部
+    document.getElementById('expand-all').addEventListener('click', function() {
+      const allCollapsed = document.querySelectorAll('.tree-group.collapsed').length === bookmarkData.groups.length;
+      
+      document.querySelectorAll('.tree-group').forEach(group => {
+        if (allCollapsed) {
+          group.classList.remove('collapsed');
+        } else {
+          group.classList.add('collapsed');
+        }
+      });
+      
+      // 更新图标
+      const icon = this.querySelector('i');
+      icon.setAttribute('data-lucide', allCollapsed ? 'fold-vertical' : 'unfold-vertical');
+      lucide.createIcons();
+    });
+
+    // 搜索功能
+    const searchInput = document.getElementById('search-input');
+    const clearSearch = document.getElementById('clear-search');
+
+    searchInput.addEventListener('input', function(e) {
+      const query = e.target.value.toLowerCase();
+      
+      if (query) {
+        clearSearch.style.opacity = '1';
+        // 实现搜索过滤逻辑
+        filterBookmarks(query);
+      } else {
+        clearSearch.style.opacity = '0';
+        renderBookmarkTree();
+      }
+    });
+
+    clearSearch.addEventListener('click', function() {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.focus();
+    });
+
+    function filterBookmarks(query) {
+      // 这里可以实现搜索高亮和过滤逻辑
+      console.log('Searching for:', query);
+    }
+
+    // 初始化
+    document.addEventListener('DOMContentLoaded', () => {
+      renderBookmarkTree();
+    });
+  </script>
+</body>
+</html>

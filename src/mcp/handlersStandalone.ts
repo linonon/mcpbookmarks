@@ -13,6 +13,7 @@ import {
   GetBookmarkArgs,
   GetBookmarkTreeArgs,
   BatchAddBookmarksArgs,
+  BatchRemoveBookmarksArgs,
   ClearAllBookmarksArgs,
   BookmarkCategory,
   Bookmark,
@@ -405,6 +406,10 @@ export class MCPHandlersStandalone {
         tags
       });
 
+      if (result === 'not_found') {
+        return { success: false, error: `Bookmark with id "${bookmarkId}" not found` };
+      }
+
       if (result === 'circular_reference') {
         return {
           success: false,
@@ -417,10 +422,6 @@ export class MCPHandlersStandalone {
           success: false,
           error: `Parent bookmark with id "${parentId}" not found in the same group`
         };
-      }
-
-      if (!result) {
-        return { success: false, error: `Bookmark with id "${bookmarkId}" not found` };
       }
 
       return {
@@ -717,6 +718,49 @@ export class MCPHandlersStandalone {
       return {
         success: false,
         error: `Failed to batch add bookmarks: ${error}`
+      };
+    }
+  }
+
+  // batch_remove_bookmarks
+  batchRemoveBookmarks(args: WithProjectRoot<BatchRemoveBookmarksArgs>): ToolResult {
+    try {
+      const { bookmarkIds, projectRoot } = args;
+      const store = this.getStore(projectRoot);
+
+      if (!bookmarkIds || !Array.isArray(bookmarkIds) || bookmarkIds.length === 0) {
+        return { success: false, error: 'bookmarkIds array is required and must not be empty' };
+      }
+
+      const results: Array<{ bookmarkId: string; success: boolean; error?: string }> = [];
+      let successCount = 0;
+
+      for (const bookmarkId of bookmarkIds) {
+        if (!bookmarkId || typeof bookmarkId !== 'string') {
+          results.push({ bookmarkId: bookmarkId || '(invalid)', success: false, error: 'Invalid bookmark ID' });
+          continue;
+        }
+
+        const removed = store.removeBookmark(bookmarkId);
+        if (removed) {
+          results.push({ bookmarkId, success: true });
+          successCount++;
+        } else {
+          results.push({ bookmarkId, success: false, error: 'Bookmark not found or failed to remove' });
+        }
+      }
+
+      return {
+        success: successCount > 0,
+        data: {
+          message: `Removed ${successCount}/${bookmarkIds.length} bookmarks`,
+          results
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to batch remove bookmarks: ${error}`
       };
     }
   }

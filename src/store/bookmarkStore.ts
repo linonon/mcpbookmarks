@@ -8,6 +8,7 @@ import {
   Bookmark,
   BookmarkWithChildren,
   BookmarkCategory,
+  UpdateBookmarkResult,
   createDefaultStore
 } from './types';
 import { nowISO, parseLocation, normalizePath, formatLocation, adjustLineNumbers } from '../utils';
@@ -426,10 +427,10 @@ export class BookmarkStoreManager {
       category?: BookmarkCategory;
       tags?: string[];
     }
-  ): boolean {
+  ): UpdateBookmarkResult {
     const result = this.getBookmark(bookmarkId);
     if (!result) {
-      return false;
+      return 'not_found';
     }
 
     const { bookmark, group } = result;
@@ -443,12 +444,12 @@ export class BookmarkStoreManager {
         // 检查父书签是否存在
         const parentBookmark = group.bookmarks.find(b => b.id === newParentId);
         if (!parentBookmark) {
-          return false; // 父书签不存在
+          return 'parent_not_found';
         }
 
         // 检查是否会形成循环引用
         if (this.wouldCreateCircularReference(group, bookmarkId, newParentId)) {
-          return false; // 会形成循环引用
+          return 'circular_reference';
         }
       }
 

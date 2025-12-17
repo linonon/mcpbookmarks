@@ -13,6 +13,7 @@ import {
   GetBookmarkArgs,
   GetBookmarkTreeArgs,
   BatchAddBookmarksArgs,
+  BatchRemoveBookmarksArgs,
   ClearAllBookmarksArgs,
   BookmarkCategory,
   BookmarkWithChildren
@@ -339,7 +340,7 @@ export class MCPHandlers {
         tags
       });
 
-      if (result === false) {
+      if (result === 'not_found') {
         return { success: false, error: `Bookmark with id "${bookmarkId}" not found` };
       }
 
@@ -696,6 +697,48 @@ export class MCPHandlers {
       return {
         success: false,
         error: `Failed to batch add bookmarks: ${error}`
+      };
+    }
+  }
+
+  // batch_remove_bookmarks - 批量删除书签
+  batchRemoveBookmarks(args: BatchRemoveBookmarksArgs): ToolResult {
+    try {
+      const { bookmarkIds } = args;
+
+      if (!bookmarkIds || !Array.isArray(bookmarkIds) || bookmarkIds.length === 0) {
+        return { success: false, error: 'bookmarkIds array is required and must not be empty' };
+      }
+
+      const results: Array<{ bookmarkId: string; success: boolean; error?: string }> = [];
+      let successCount = 0;
+
+      for (const bookmarkId of bookmarkIds) {
+        if (!bookmarkId || typeof bookmarkId !== 'string') {
+          results.push({ bookmarkId: bookmarkId || '(invalid)', success: false, error: 'Invalid bookmark ID' });
+          continue;
+        }
+
+        const removed = this.store.removeBookmark(bookmarkId);
+        if (removed) {
+          results.push({ bookmarkId, success: true });
+          successCount++;
+        } else {
+          results.push({ bookmarkId, success: false, error: 'Bookmark not found or failed to remove' });
+        }
+      }
+
+      return {
+        success: successCount > 0,
+        data: {
+          message: `Removed ${successCount}/${bookmarkIds.length} bookmarks`,
+          results
+        }
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: `Failed to batch remove bookmarks: ${error}`
       };
     }
   }

@@ -120,6 +120,9 @@ export interface UpdateBookmarkArgs {
   tags?: string[];
 }
 
+// updateBookmark 返回类型
+export type UpdateBookmarkResult = true | 'not_found' | 'circular_reference' | 'parent_not_found';
+
 export interface RemoveBookmarkArgs {
   bookmarkId: string;
 }
@@ -151,6 +154,10 @@ export interface BatchAddBookmarksArgs {
 
 export interface ClearAllBookmarksArgs {
   confirm?: boolean;  // 确认清除, 防止误操作
+}
+
+export interface BatchRemoveBookmarksArgs {
+  bookmarkIds: string[];  // 要删除的书签ID列表
 }
 
 // Default store factory

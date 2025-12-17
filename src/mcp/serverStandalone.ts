@@ -76,6 +76,12 @@ Then all subsequent bookmark operations will save to /Users/name/projects/myapp/
     name: 'add_bookmark',
     description: `Add a bookmark to a group. Bookmarks mark important code locations with explanations. Supports hierarchical bookmarks via parentId.
 
+**CRITICAL - NEVER GUESS LINE NUMBERS!**
+- You MUST read the file FIRST to find the EXACT line number before adding a bookmark
+- NEVER use file:1 - the first line is almost always an import statement, not meaningful code
+- If you haven't read the file, READ IT FIRST with the Read tool, then come back to add the bookmark
+- Guessing line numbers makes bookmarks useless - they will point to wrong code
+
 **CRITICAL - Location Guidelines (CALL SITE vs DEFINITION):**
 - For call chain/flow analysis: Mark the CALL SITE (where function is called), NOT the function definition
 - This creates a clear traceable path through the code
@@ -166,6 +172,11 @@ CORRECT: 1. handleRequest (parent) â†’ 1.1 validateInput (child at call site) â†
   {
     name: 'add_child_bookmark',
     description: `Add a child bookmark under an existing bookmark. Creates hierarchical structure.
+
+**CRITICAL - NEVER GUESS LINE NUMBERS!**
+- You MUST read the file FIRST to find the EXACT line number before adding a bookmark
+- NEVER use file:1 - the first line is almost always an import statement, not meaningful code
+- If you haven't read the file, READ IT FIRST with the Read tool, then come back to add the bookmark
 
 **CRITICAL - Location = CALL SITE in parent function:**
 - The location should be WHERE the child function is CALLED (inside the parent)
@@ -298,7 +309,16 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
   },
   {
     name: 'update_bookmark',
-    description: 'Update a bookmark\'s properties. Supports moving bookmark in hierarchy via parentId.',
+    description: `Update a bookmark's properties. Supports moving bookmark in hierarchy via parentId.
+
+**PREFER THIS OVER DELETE+RECREATE!**
+- To fix a title: update_bookmark({ bookmarkId, title: "new title" })
+- To fix description: update_bookmark({ bookmarkId, description: "new desc" })
+- To move to different parent: update_bookmark({ bookmarkId, parentId: "newParentId" })
+- To change location: update_bookmark({ bookmarkId, location: "file:line" })
+
+All fields except bookmarkId are optional - only specify what you want to change.
+Circular references are automatically prevented when moving in hierarchy.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -343,7 +363,15 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
   },
   {
     name: 'remove_bookmark',
-    description: 'Remove a bookmark by its ID. If the bookmark has children, all child bookmarks are also removed (cascade delete).',
+    description: `Remove a bookmark by its ID. CASCADE DELETES all child bookmarks.
+
+**STOP! Before removing, ask yourself:**
+1. Can I UPDATE this bookmark instead? (update_bookmark)
+2. Did I verify the bookmark content first? (get_bookmark)
+3. Am I aware this will delete ALL child bookmarks?
+
+Only remove a bookmark when it is truly no longer needed.
+For bulk removal, use batch_remove_bookmarks.`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -354,21 +382,6 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         }
       },
       required: ['bookmarkId']
-    }
-  },
-  {
-    name: 'remove_group',
-    description: 'Remove a bookmark group and all its bookmarks.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        ...PROJECT_ROOT_PROPERTY,
-        groupId: {
-          type: 'string',
-          description: 'The ID of the group to remove'
-        }
-      },
-      required: ['groupId']
     }
   },
   {
@@ -423,6 +436,11 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
   {
     name: 'batch_add_bookmarks',
     description: `Add multiple bookmarks to a group in a single operation. More efficient than adding one by one.
+
+**CRITICAL - NEVER GUESS LINE NUMBERS!**
+- You MUST read files FIRST to find EXACT line numbers before adding bookmarks
+- NEVER use file:1 - the first line is almost always an import statement
+- If you haven't read the files, READ THEM FIRST, then come back to add bookmarks
 
 **CRITICAL - This tool is for adding SIBLING bookmarks at the SAME LEVEL!**
 - All bookmarks in one batch share the same parent (or all are top-level if no parentId)
@@ -512,18 +530,27 @@ batch_add_bookmarks({
     }
   },
   {
-    name: 'clear_all_bookmarks',
-    description: 'Clear all bookmarks and groups. This is a destructive operation that requires explicit confirmation.',
+    name: 'batch_remove_bookmarks',
+    description: `Remove multiple bookmarks by their IDs in a single operation.
+
+**IMPORTANT - Before removing, consider:**
+1. Can you UPDATE the bookmark instead? Use update_bookmark to modify content
+2. Are you sure these bookmarks are no longer needed?
+3. Child bookmarks will be CASCADE DELETED
+
+This tool removes ONLY the specified bookmarks. To remove an entire group's bookmarks,
+you must list all bookmarks in that group first and remove them individually.`,
     inputSchema: {
       type: 'object',
       properties: {
         ...PROJECT_ROOT_PROPERTY,
-        confirm: {
-          type: 'boolean',
-          description: 'Must be set to true to confirm the operation. This prevents accidental data loss.'
+        bookmarkIds: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'Array of bookmark IDs to remove. Each bookmark and its children will be deleted.'
         }
       },
-      required: ['confirm']
+      required: ['bookmarkIds']
     }
   }
 ];
@@ -606,8 +633,8 @@ export class MCPServerStandalone {
         case 'batch_add_bookmarks':
           result = this.handlers.batchAddBookmarks(args as unknown as Parameters<MCPHandlersStandalone['batchAddBookmarks']>[0]);
           break;
-        case 'clear_all_bookmarks':
-          result = this.handlers.clearAllBookmarks(args as unknown as Parameters<MCPHandlersStandalone['clearAllBookmarks']>[0]);
+        case 'batch_remove_bookmarks':
+          result = this.handlers.batchRemoveBookmarks(args as unknown as Parameters<MCPHandlersStandalone['batchRemoveBookmarks']>[0]);
           break;
         default:
           result = { success: false, error: `Unknown tool: ${name}` };

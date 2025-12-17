@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { BookmarkStoreManager } from '../store/bookmarkStore';
+import { Bookmark } from '../store/types';
 import { parseLocation, normalizePath } from '../utils';
 
 // Category colors (simplified to 4 categories)

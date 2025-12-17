@@ -8,6 +8,7 @@ import {
   Bookmark,
   BookmarkWithChildren,
   BookmarkCategory,
+  UpdateBookmarkResult,
   createDefaultStore
 } from './types';
 import { nowISO, parseLocation, normalizePath } from '../utils';
@@ -391,10 +392,10 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
       category?: BookmarkCategory;
       tags?: string[];
     }
-  ): boolean | 'circular_reference' | 'parent_not_found' {
+  ): UpdateBookmarkResult {
     const result = this.getBookmark(bookmarkId);
     if (!result) {
-      return false;
+      return 'not_found';
     }
 
     const { bookmark, group } = result;

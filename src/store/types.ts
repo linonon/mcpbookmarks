@@ -16,7 +16,6 @@ export interface Bookmark {
   title: string;                 // 简短标题
   description: string;           // 详细说明
   category?: BookmarkCategory;   // 分类
-  tags?: string[];               // 标签
 
   // 漂移检测(可选)
   codeSnapshot?: string;         // 创建时的代码快照
@@ -72,7 +71,6 @@ export interface AddBookmarkArgs {
   description: string;
   order?: number;
   category?: BookmarkCategory;
-  tags?: string[];
 }
 
 export interface AddChildBookmarkArgs {
@@ -82,7 +80,6 @@ export interface AddChildBookmarkArgs {
   description: string;
   order?: number;
   category?: BookmarkCategory;
-  tags?: string[];
 }
 
 export interface ListGroupsArgs {
@@ -95,7 +92,6 @@ export interface ListBookmarksArgs {
   includeDescendants?: boolean;  // 是否包含所有后代
   filePath?: string;
   category?: BookmarkCategory;
-  tags?: string[];
 }
 
 export interface GetBookmarkTreeArgs {
@@ -117,7 +113,6 @@ export interface UpdateBookmarkArgs {
   description?: string;
   order?: number;
   category?: BookmarkCategory;
-  tags?: string[];
 }
 
 // updateBookmark 返回类型
@@ -148,7 +143,6 @@ export interface BatchAddBookmarksArgs {
     description: string;
     order?: number;
     category?: BookmarkCategory;
-    tags?: string[];
   }>;
 }
 

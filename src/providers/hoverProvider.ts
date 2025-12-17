@@ -79,9 +79,6 @@ export class BookmarkHoverProvider implements vscode.HoverProvider {
         md.appendMarkdown(`**Category:** ${getCategoryDisplayName(bookmark.category)}\n\n`);
       }
 
-      if (bookmark.tags && bookmark.tags.length > 0) {
-        md.appendMarkdown(`**Tags:** ${bookmark.tags.map(t => `\`${t}\``).join(' ')}`);
-      }
     }
 
     return md;

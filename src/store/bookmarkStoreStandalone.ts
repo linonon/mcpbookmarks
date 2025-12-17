@@ -146,7 +146,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
       parentId?: string;
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
       codeSnapshot?: string;
     } = {}
   ): string | undefined {
@@ -182,7 +181,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
       title,
       description,
       category: options.category,
-      tags: options.tags,
       codeSnapshot: options.codeSnapshot
     };
 
@@ -204,7 +202,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
     options: {
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
       codeSnapshot?: string;
     } = {}
   ): string | undefined {
@@ -240,7 +237,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
     topLevelOnly?: boolean;       // Only return top-level bookmarks
     filePath?: string;
     category?: BookmarkCategory;
-    tags?: string[];
   } = {}): Array<{ bookmark: Bookmark; group: BookmarkGroup }> {
     const results: Array<{ bookmark: Bookmark; group: BookmarkGroup }> = [];
 
@@ -278,12 +274,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
 
         if (filters.category && bookmark.category !== filters.category) {
           continue;
-        }
-
-        if (filters.tags && filters.tags.length > 0) {
-          if (!bookmark.tags || !filters.tags.some(t => bookmark.tags!.includes(t))) {
-            continue;
-          }
         }
 
         results.push({ bookmark, group });
@@ -390,7 +380,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
       description?: string;
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
     }
   ): UpdateBookmarkResult {
     const result = this.getBookmark(bookmarkId);
@@ -443,9 +432,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
     }
     if (updates.category !== undefined) {
       bookmark.category = updates.category;
-    }
-    if (updates.tags !== undefined) {
-      bookmark.tags = updates.tags;
     }
 
     group.updatedAt = nowISO();
@@ -543,9 +529,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
         lines.push(`**Location:** \`${bookmark.location}\``);
         if (bookmark.category) {
           lines.push(`**Category:** ${bookmark.category}`);
-        }
-        if (bookmark.tags && bookmark.tags.length > 0) {
-          lines.push(`**Tags:** ${bookmark.tags.join(', ')}`);
         }
         lines.push('');
         lines.push(bookmark.description);

@@ -181,7 +181,6 @@ export class BookmarkStoreManager {
       parentId?: string;
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
       codeSnapshot?: string;
     } = {}
   ): string | undefined {
@@ -217,7 +216,6 @@ export class BookmarkStoreManager {
       title,
       description,
       category: options.category,
-      tags: options.tags,
       codeSnapshot: options.codeSnapshot
     };
 
@@ -239,7 +237,6 @@ export class BookmarkStoreManager {
     options: {
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
       codeSnapshot?: string;
     } = {}
   ): string | undefined {
@@ -275,7 +272,6 @@ export class BookmarkStoreManager {
     topLevelOnly?: boolean;       // 只返回顶层书签
     filePath?: string;
     category?: BookmarkCategory;
-    tags?: string[];
   } = {}): Array<{ bookmark: Bookmark; group: BookmarkGroup }> {
     const results: Array<{ bookmark: Bookmark; group: BookmarkGroup }> = [];
 
@@ -313,12 +309,6 @@ export class BookmarkStoreManager {
 
         if (filters.category && bookmark.category !== filters.category) {
           continue;
-        }
-
-        if (filters.tags && filters.tags.length > 0) {
-          if (!bookmark.tags || !filters.tags.some(t => bookmark.tags!.includes(t))) {
-            continue;
-          }
         }
 
         results.push({ bookmark, group });
@@ -425,7 +415,6 @@ export class BookmarkStoreManager {
       description?: string;
       order?: number;
       category?: BookmarkCategory;
-      tags?: string[];
     }
   ): UpdateBookmarkResult {
     const result = this.getBookmark(bookmarkId);
@@ -478,9 +467,6 @@ export class BookmarkStoreManager {
     }
     if (updates.category !== undefined) {
       bookmark.category = updates.category;
-    }
-    if (updates.tags !== undefined) {
-      bookmark.tags = updates.tags;
     }
 
     group.updatedAt = nowISO();
@@ -566,9 +552,6 @@ export class BookmarkStoreManager {
         lines.push(`**Location:** \`${bookmark.location}\``);
         if (bookmark.category) {
           lines.push(`**Category:** ${bookmark.category}`);
-        }
-        if (bookmark.tags && bookmark.tags.length > 0) {
-          lines.push(`**Tags:** ${bookmark.tags.join(', ')}`);
         }
         lines.push('');
         lines.push(bookmark.description);

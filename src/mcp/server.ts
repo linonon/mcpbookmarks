@@ -37,9 +37,10 @@ const TOOLS: Tool[] = [
     description: `Add a bookmark to a group. Bookmarks mark important code locations with explanations. Supports hierarchical bookmarks via parentId.
 
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
-- You MUST read the file FIRST to find the EXACT line number before adding a bookmark
+- You MUST use Grep tool to search and confirm the EXACT line number before adding a bookmark
+- NEVER estimate or guess line numbers - always search with Grep first
 - NEVER use file:1 - the first line is almost always an import statement, not meaningful code
-- If you haven't read the file, READ IT FIRST with the Read tool, then come back to add the bookmark
+- Example: \`Grep pattern="function handleRequest" path="src/handler.ts"\` to find exact line
 - Guessing line numbers makes bookmarks useless - they will point to wrong code
 - **LSP/Serena returns 0-indexed line numbers!** If using Serena MCP, add 1: bookmark_line = serena_line + 1
 
@@ -119,11 +120,6 @@ CORRECT: 1. handleRequest (parent) â†’ 1.1 validateInput (child at call site) â†
           type: 'string',
           enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Bookmark category'
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Tags for filtering'
         }
       },
       required: ['groupId', 'location', 'title', 'description']
@@ -134,9 +130,9 @@ CORRECT: 1. handleRequest (parent) â†’ 1.1 validateInput (child at call site) â†
     description: `Add a child bookmark under an existing bookmark. Creates hierarchical structure.
 
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
-- You MUST read the file FIRST to find the EXACT line number before adding a bookmark
+- You MUST use Grep tool to search and confirm the EXACT line number before adding a bookmark
+- NEVER estimate or guess line numbers - always search with Grep first
 - NEVER use file:1 - the first line is almost always an import statement, not meaningful code
-- If you haven't read the file, READ IT FIRST with the Read tool, then come back to add the bookmark
 
 **CRITICAL - Location = CALL SITE in parent function:**
 - The location should be WHERE the child function is CALLED (inside the parent)
@@ -182,11 +178,6 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
           type: 'string',
           enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Bookmark category'
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Tags for filtering'
         }
       },
       required: ['parentBookmarkId', 'location', 'title', 'description']
@@ -232,11 +223,6 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
           type: 'string',
           enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Filter by category'
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'Filter by tags (any match)'
         }
       }
     }
@@ -306,11 +292,6 @@ Circular references are automatically prevented when moving in hierarchy.`,
           type: 'string',
           enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'New category'
-        },
-        tags: {
-          type: 'array',
-          items: { type: 'string' },
-          description: 'New tags'
         }
       },
       required: ['bookmarkId']
@@ -389,9 +370,9 @@ For bulk removal, use batch_remove_bookmarks.`,
     description: `Add multiple bookmarks to a group in a single operation. More efficient than adding one by one.
 
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
-- You MUST read files FIRST to find EXACT line numbers before adding bookmarks
+- You MUST use Grep tool to search and confirm EXACT line numbers before adding bookmarks
+- NEVER estimate or guess line numbers - always search with Grep first
 - NEVER use file:1 - the first line is almost always an import statement
-- If you haven't read the files, READ THEM FIRST, then come back to add bookmarks
 
 **CRITICAL - This tool is for adding SIBLING bookmarks at the SAME LEVEL!**
 - All bookmarks in one batch share the same parent (or all are top-level if no parentId)
@@ -465,11 +446,6 @@ batch_add_bookmarks({
                 type: 'string',
                 enum: ['entry-point', 'core-logic', 'issue', 'note'],
                 description: 'Bookmark category'
-              },
-              tags: {
-                type: 'array',
-                items: { type: 'string' },
-                description: 'Tags for filtering'
               }
             },
             required: ['location', 'title', 'description']

@@ -187,7 +187,6 @@ interface Bookmark {
   title: string;                 // 簡短標題
   description: string;           // 詳細說明
   category?: BookmarkCategory;   // 分類
-  tags?: string[];               // 標籤
 
   // 漂移檢測（可選）
   codeSnapshot?: string;         // 創建時的代碼快照
@@ -241,7 +240,6 @@ interface BookmarkStore {
 | description | string | ✓ | 詳細說明 |
 | order | number | | 順序，不填則追加到同級末尾 |
 | category | string | | 分類 |
-| tags | string[] | | 標籤列表 |
 
 **層級使用指南：**
 - 函數 A 調用函數 B → B 應該是 A 的子書籤 (使用 parentId)
@@ -268,7 +266,6 @@ interface BookmarkStore {
 | includeDescendants | boolean | | 配合 parentId, 包含所有後代而非只有直接子書籤 |
 | filePath | string | | 篩選特定文件 |
 | category | string | | 篩選特定分類 |
-| tags | string[] | | 篩選特定標籤 |
 
 ### update_group
 
@@ -295,7 +292,6 @@ interface BookmarkStore {
 | description | string | | 新說明 |
 | order | number | | 新順序 |
 | category | string | | 新分類 |
-| tags | string[] | | 新標籤 |
 
 ### remove_bookmark
 
@@ -350,7 +346,6 @@ interface BookmarkStore {
 | description | string | ✓ | 說明 |
 | order | number | | 順序 |
 | category | string | | 分類 |
-| tags | string[] | | 標籤 |
 
 **使用場景：**
 - 函數 A 調用函數 B → B 是 A 的子書籤
@@ -388,7 +383,6 @@ interface BookmarkStore {
 | description | string | ✓ | 說明 |
 | order | number | | 順序 |
 | category | string | | 分類 |
-| tags | string[] | | 標籤 |
 
 **返回：** 添加結果摘要及每個書籤的狀態
 
@@ -785,8 +779,7 @@ add_bookmark({
   order: 1,
   title: "遊戲初始化",
   description: "創建遊戲實例，初始化 multiplier 為 1.0，設置遊戲狀態為 waiting",
-  category: "entry-point",
-  tags: ["init", "game-loop"]
+  category: "entry-point"
 })
 
 add_bookmark({
@@ -795,8 +788,7 @@ add_bookmark({
   order: 2,
   title: "下注階段處理",
   description: "收集玩家下注，驗證餘額，記錄下注時間。這個階段持續 10 秒。",
-  category: "core-logic",
-  tags: ["betting", "validation"]
+  category: "core-logic"
 })
 
 add_bookmark({
@@ -805,8 +797,7 @@ add_bookmark({
   order: 3,
   title: "生成 Crash Point",
   description: "使用 provably fair 算法生成本局的 crash 點位",
-  category: "core-logic",
-  tags: ["random", "provably-fair"]
+  category: "core-logic"
 })
 
 // ... 繼續添加流程中的其他節點
@@ -832,8 +823,7 @@ add_bookmark({
   order: 1,
   title: "精度問題",
   description: "float64 計算 multiplier 可能有精度累積誤差，建議使用 decimal 庫",
-  category: "note",
-  tags: ["precision", "math"]
+  category: "note"
 })
 
 add_bookmark({
@@ -842,8 +832,7 @@ add_bookmark({
   order: 2,
   title: "並發安全",
   description: "結算時遍歷玩家 map 沒有加鎖，可能導致 concurrent map iteration",
-  category: "issue",
-  tags: ["concurrency", "critical"]
+  category: "issue"
 })
 ```
 
@@ -859,8 +848,7 @@ add_bookmark({
   order: 6,  // 追加到流程末尾
   title: "玩家 Cash Out",
   description: "玩家可以在 crash 前提前離場，鎖定當前倍率的收益",
-  category: "core-logic",
-  tags: ["cashout", "player-action"]
+  category: "core-logic"
 })
 ```
 
@@ -868,7 +856,7 @@ add_bookmark({
 
 ### 近期 (手動配置功能)
 - [ ] **Phase 1**: 基礎手動操作 - 創建分組、刪除書籤/分組、編輯書籤
-- [ ] **Phase 2**: 完善編輯 - 編輯分類標籤、調整順序
+- [ ] **Phase 2**: 完善編輯 - 編輯分類、調整順序
 - [ ] **Phase 3**: 高級功能 - 拖拽操作、批量操作
 
 ### 中期

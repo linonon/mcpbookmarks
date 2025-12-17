@@ -318,9 +318,6 @@ export class BookmarkTreeProvider implements vscode.TreeDataProvider<BookmarkTre
     if (bookmark.category) {
       tooltip.appendMarkdown(`**Category:** ${getCategoryDisplayName(bookmark.category)}\n\n`);
     }
-    if (bookmark.tags && bookmark.tags.length > 0) {
-      tooltip.appendMarkdown(`**Tags:** ${bookmark.tags.map(t => `\`${t}\``).join(' ')}\n\n`);
-    }
     tooltip.appendMarkdown(`**Group:** ${group.name}\n\n`);
     if (bookmark.parentId) {
       tooltip.appendMarkdown(`**Parent:** Has parent bookmark\n\n`);

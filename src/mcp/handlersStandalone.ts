@@ -129,7 +129,7 @@ export class MCPHandlersStandalone {
   // add_bookmark
   addBookmark(args: WithProjectRoot<AddBookmarkArgs>): ToolResult {
     try {
-      const { groupId, parentId, location, title, description, order, category, tags, projectRoot } = args;
+      const { groupId, parentId, location, title, description, order, category, projectRoot } = args;
       const store = this.getStore(projectRoot);
 
       if (!groupId || typeof groupId !== 'string') {
@@ -158,8 +158,7 @@ export class MCPHandlersStandalone {
       const bookmarkId = store.addBookmark(groupId, location, title, description, {
         parentId,
         order,
-        category,
-        tags
+        category
       });
 
       if (!bookmarkId) {
@@ -192,7 +191,7 @@ export class MCPHandlersStandalone {
   // add_child_bookmark
   addChildBookmark(args: WithProjectRoot<AddChildBookmarkArgs>): ToolResult {
     try {
-      const { parentBookmarkId, location, title, description, order, category, tags, projectRoot } = args;
+      const { parentBookmarkId, location, title, description, order, category, projectRoot } = args;
       const store = this.getStore(projectRoot);
 
       if (!parentBookmarkId || typeof parentBookmarkId !== 'string') {
@@ -220,8 +219,7 @@ export class MCPHandlersStandalone {
 
       const bookmarkId = store.addChildBookmark(parentBookmarkId, location, title, description, {
         order,
-        category,
-        tags
+        category
       });
 
       if (!bookmarkId) {
@@ -287,7 +285,7 @@ export class MCPHandlersStandalone {
   // list_bookmarks
   listBookmarks(args: WithProjectRoot<ListBookmarksArgs>): ToolResult {
     try {
-      const { groupId, parentId, includeDescendants, filePath, category, tags, projectRoot } = args;
+      const { groupId, parentId, includeDescendants, filePath, category, projectRoot } = args;
       const store = this.getStore(projectRoot);
 
       const validCategories: BookmarkCategory[] = [
@@ -305,8 +303,7 @@ export class MCPHandlersStandalone {
         parentId,
         includeDescendants,
         filePath,
-        category,
-        tags
+        category
       });
 
       return {
@@ -320,7 +317,6 @@ export class MCPHandlersStandalone {
             title: r.bookmark.title,
             description: r.bookmark.description,
             category: r.bookmark.category,
-            tags: r.bookmark.tags,
             groupId: r.group.id,
             groupName: r.group.name,
             hasChildren: store.hasChildren(r.bookmark.id)
@@ -373,7 +369,7 @@ export class MCPHandlersStandalone {
   // update_bookmark
   updateBookmark(args: WithProjectRoot<UpdateBookmarkArgs>): ToolResult {
     try {
-      const { bookmarkId, parentId, location, title, description, order, category, tags, projectRoot } = args;
+      const { bookmarkId, parentId, location, title, description, order, category, projectRoot } = args;
       const store = this.getStore(projectRoot);
 
       if (!bookmarkId || typeof bookmarkId !== 'string') {
@@ -381,8 +377,7 @@ export class MCPHandlersStandalone {
       }
 
       if (parentId === undefined && location === undefined && title === undefined &&
-          description === undefined && order === undefined && category === undefined &&
-          tags === undefined) {
+          description === undefined && order === undefined && category === undefined) {
         return { success: false, error: 'At least one update field must be provided' };
       }
 
@@ -402,8 +397,7 @@ export class MCPHandlersStandalone {
         title,
         description,
         order,
-        category,
-        tags
+        category
       });
 
       if (result === 'not_found') {
@@ -540,7 +534,6 @@ export class MCPHandlersStandalone {
               title: b.title,
               description: b.description,
               category: b.category,
-              tags: b.tags,
               hasChildren: store.hasChildren(b.id)
             })),
             bookmarkTrees
@@ -584,7 +577,6 @@ export class MCPHandlersStandalone {
             title: bookmark.title,
             description: bookmark.description,
             category: bookmark.category,
-            tags: bookmark.tags,
             codeSnapshot: bookmark.codeSnapshot,
             hasChildren: childCount > 0,
             childCount
@@ -694,8 +686,7 @@ export class MCPHandlersStandalone {
         const bookmarkId = store.addBookmark(groupId, b.location, b.title, b.description, {
           parentId,
           order: b.order,
-          category: b.category,
-          tags: b.tags
+          category: b.category
         });
 
         if (bookmarkId) {

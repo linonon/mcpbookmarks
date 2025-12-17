@@ -549,8 +549,7 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
       const editOptions = [
         { label: 'Title', description: bookmark.title },
         { label: 'Description', description: bookmark.description.substring(0, 50) + '...' },
-        { label: 'Category', description: bookmark.category || 'None' },
-        { label: 'Tags', description: bookmark.tags?.join(', ') || 'None' }
+        { label: 'Category', description: bookmark.category || 'None' }
       ];
 
       const selected = await vscode.window.showQuickPick(editOptions, {
@@ -599,18 +598,6 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
             const category = newCat.label === 'None' ? undefined : newCat.label as import('./store/types').BookmarkCategory;
             bookmarkStore.updateBookmark(bookmark.id, { category });
             vscode.window.showInformationMessage('Category updated');
-          }
-          break;
-        }
-        case 'Tags': {
-          const newTags = await vscode.window.showInputBox({
-            prompt: 'Enter tags (comma-separated)',
-            value: bookmark.tags?.join(', ') || ''
-          });
-          if (newTags !== undefined) {
-            const tags = newTags.split(',').map(t => t.trim()).filter(t => t.length > 0);
-            bookmarkStore.updateBookmark(bookmark.id, { tags: tags.length > 0 ? tags : undefined });
-            vscode.window.showInformationMessage('Tags updated');
           }
           break;
         }
@@ -883,7 +870,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         return;
       }
 
-      const infoText = `[Bookmark] ${bookmarkItem.bookmark.title}`;
+      const bookmark = bookmarkItem.bookmark;
+      const infoText = `${bookmark.location}: ${bookmark.title}`;
       await vscode.env.clipboard.writeText(infoText);
       vscode.window.showInformationMessage('Bookmark info copied');
     })

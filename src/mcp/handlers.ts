@@ -57,7 +57,7 @@ export class MCPHandlers {
   // add_bookmark - 在指定分组中添加书签(支持parentId指定父书签)
   addBookmark(args: AddBookmarkArgs): ToolResult {
     try {
-      const { groupId, parentId, location, title, description, order, category, tags } = args;
+      const { groupId, parentId, location, title, description, order, category } = args;
 
       if (!groupId || typeof groupId !== 'string') {
         return { success: false, error: 'groupId is required and must be a string' };
@@ -86,8 +86,7 @@ export class MCPHandlers {
       const bookmarkId = this.store.addBookmark(groupId, location, title, description, {
         parentId,
         order,
-        category,
-        tags
+        category
       });
 
       if (!bookmarkId) {
@@ -125,7 +124,7 @@ export class MCPHandlers {
   // add_child_bookmark - 给现有书签添加子书签(语义化接口)
   addChildBookmark(args: AddChildBookmarkArgs): ToolResult {
     try {
-      const { parentBookmarkId, location, title, description, order, category, tags } = args;
+      const { parentBookmarkId, location, title, description, order, category } = args;
 
       if (!parentBookmarkId || typeof parentBookmarkId !== 'string') {
         return { success: false, error: 'parentBookmarkId is required and must be a string' };
@@ -153,8 +152,7 @@ export class MCPHandlers {
 
       const bookmarkId = this.store.addChildBookmark(parentBookmarkId, location, title, description, {
         order,
-        category,
-        tags
+        category
       });
 
       if (!bookmarkId) {
@@ -219,7 +217,7 @@ export class MCPHandlers {
   // list_bookmarks - 列出书签, 支持筛选(支持parentId过滤和includeDescendants)
   listBookmarks(args: ListBookmarksArgs): ToolResult {
     try {
-      const { groupId, parentId, includeDescendants, filePath, category, tags } = args;
+      const { groupId, parentId, includeDescendants, filePath, category } = args;
 
       // Validate category if provided
       const validCategories: BookmarkCategory[] = [
@@ -237,8 +235,7 @@ export class MCPHandlers {
         parentId,
         includeDescendants,
         filePath,
-        category,
-        tags
+        category
       });
 
       return {
@@ -252,7 +249,6 @@ export class MCPHandlers {
             title: r.bookmark.title,
             description: r.bookmark.description,
             category: r.bookmark.category,
-            tags: r.bookmark.tags,
             collapsed: r.bookmark.collapsed,
             hasChildren: this.store.hasChildren(r.bookmark.id),
             groupId: r.group.id,
@@ -305,7 +301,7 @@ export class MCPHandlers {
   // update_bookmark - 更新书签内容(支持parentId移动层级)
   updateBookmark(args: UpdateBookmarkArgs): ToolResult {
     try {
-      const { bookmarkId, parentId, location, title, description, order, category, tags } = args;
+      const { bookmarkId, parentId, location, title, description, order, category } = args;
 
       if (!bookmarkId || typeof bookmarkId !== 'string') {
         return { success: false, error: 'bookmarkId is required and must be a string' };
@@ -314,7 +310,7 @@ export class MCPHandlers {
       // Check if at least one update field is provided
       // parentId can be null (move to top level) or string (move under parent)
       if (location === undefined && title === undefined && description === undefined &&
-          order === undefined && category === undefined && tags === undefined &&
+          order === undefined && category === undefined &&
           parentId === undefined) {
         return { success: false, error: 'At least one update field must be provided' };
       }
@@ -336,8 +332,7 @@ export class MCPHandlers {
         title,
         description,
         order,
-        category,
-        tags
+        category
       });
 
       if (result === 'not_found') {
@@ -461,7 +456,6 @@ export class MCPHandlers {
         title: node.title,
         description: node.description,
         category: node.category,
-        tags: node.tags,
         collapsed: node.collapsed,
         children: node.children.map(formatTree)
       });
@@ -486,7 +480,6 @@ export class MCPHandlers {
               title: b.title,
               description: b.description,
               category: b.category,
-              tags: b.tags,
               collapsed: b.collapsed,
               hasChildren: this.store.hasChildren(b.id)
             })),
@@ -533,7 +526,6 @@ export class MCPHandlers {
             title: bookmark.title,
             description: bookmark.description,
             category: bookmark.category,
-            tags: bookmark.tags,
             collapsed: bookmark.collapsed,
             codeSnapshot: bookmark.codeSnapshot,
             hasChildren: children.length > 0,
@@ -582,7 +574,6 @@ export class MCPHandlers {
         title: node.title,
         description: node.description,
         category: node.category,
-        tags: node.tags,
         collapsed: node.collapsed,
         depth,
         children: node.children.map(child => formatTree(child, depth + 1))
@@ -669,8 +660,7 @@ export class MCPHandlers {
         const bookmarkId = this.store.addBookmark(groupId, b.location, b.title, b.description, {
           parentId,  // Use the batch-level parentId
           order: b.order,
-          category: b.category,
-          tags: b.tags
+          category: b.category
         });
 
         if (bookmarkId) {

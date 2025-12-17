@@ -1,4 +1,5 @@
 .PHONY: install watch compile package clean lint dev mcp-add mcp-remove
+.PHONY: install watch compile package clean lint dev mcp-add mcp-remove reinstall-ext
 
 # Project root directory
 PROJECT_DIR := $(shell pwd)
@@ -43,6 +44,16 @@ mcp-add: compile
 mcp-remove:
 	claude mcp remove ai-bookmarks
 
+# Reinstall VS Code extension
+reinstall-ext: package
+	@VSIX_FILE=$$(ls -t *.vsix 2>/dev/null | head -n 1); \
+	if [ -z "$$VSIX_FILE" ]; then \
+		echo "Error: No .vsix file found. Please run 'make package' first."; \
+		exit 1; \
+	fi; \
+	echo "Reinstalling VS Code extension: $$VSIX_FILE"; \
+	code --install-extension $$VSIX_FILE --force
+
 # Show help
 help:
 	@echo "Available commands:"
@@ -56,3 +67,4 @@ help:
 	@echo "  make rebuild    - Full rebuild from scratch"
 	@echo "  make mcp-add    - Add MCP server to Claude Code"
 	@echo "  make mcp-remove - Remove MCP server from Claude Code"
+	@echo "  make reinstall-ext - Rebuild and reinstall the VS Code extension"

@@ -10,8 +10,6 @@
   const vscode = acquireVsCodeApi();
 
   // DOM Elements
-  const searchInput = document.getElementById('search-input');
-  const clearSearchBtn = document.getElementById('clear-search');
   const bookmarksContainer = document.getElementById('bookmarks-container');
   const loadingState = document.getElementById('loading-state');
   const emptyState = document.getElementById('empty-state');
@@ -21,6 +19,7 @@
   const contextMenu = document.getElementById('context-menu');
 
   // Header buttons
+  const btnSearch = document.getElementById('btn-search');
   const btnNewGroup = document.getElementById('btn-new-group');
   const btnToggleAll = document.getElementById('btn-toggle-all');
   const btnExport = document.getElementById('btn-export');
@@ -40,11 +39,13 @@
 
   // 设置事件监听
   function setupEventListeners() {
-    // 搜索输入
-    searchInput.addEventListener('input', debounce(handleSearch, 300));
-    clearSearchBtn.addEventListener('click', clearSearch);
-
     // Header buttons
+    if (btnSearch) {
+      btnSearch.addEventListener('click', () => {
+        vscode.postMessage({ type: 'searchBookmarks' });
+      });
+    }
+
     if (btnNewGroup) {
       btnNewGroup.addEventListener('click', () => {
         vscode.postMessage({ type: 'createGroup' });
@@ -458,23 +459,7 @@
     }
   }
 
-  // 处理搜索
-  function handleSearch() {
-    const query = searchInput.value.trim();
-    if (query) {
-      clearSearchBtn.style.display = 'block';
-      vscode.postMessage({ type: 'search', query });
-    } else {
-      clearSearch();
-    }
-  }
 
-  // 清除搜索
-  function clearSearch() {
-    searchInput.value = '';
-    clearSearchBtn.style.display = 'none';
-    renderGroups(currentData.groups);
-  }
 
   // 处理搜索结果
   function handleSearchResults(data) {

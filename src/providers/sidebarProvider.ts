@@ -160,6 +160,17 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
         }
         break;
 
+      case 'searchBookmarks':
+        // 弹出输入框让用户输入搜索关键词
+        const query = await vscode.window.showInputBox({
+          placeHolder: 'Search bookmarks by title, description or location...',
+          prompt: 'Enter search query'
+        });
+        if (query) {
+          this.performSearch(query);
+        }
+        break;
+
       case 'search':
         if (message.query !== undefined) {
           this.performSearch(message.query);

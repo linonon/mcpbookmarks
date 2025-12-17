@@ -59,7 +59,7 @@
       },
       {
         "command": "aiBookmarks.createGroup",
-        "title": "Create Bookmark Group"
+        "title": "New Group"
       },
       {
         "command": "aiBookmarks.exportMarkdown",
@@ -154,38 +154,38 @@
     "menus": {
       "view/title": [
         {
-          "command": "aiBookmarks.refresh",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
-        },
-        {
           "command": "aiBookmarks.search",
           "when": "view == aiBookmarks",
-          "group": "navigation"
-        },
-        {
-          "command": "aiBookmarks.createGroup",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
-        },
-        {
-          "command": "aiBookmarks.toggleViewMode",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
-        },
-        {
-          "command": "aiBookmarks.exportMarkdown",
-          "when": "view == aiBookmarks"
+          "group": "navigation@1"
         },
         {
           "command": "aiBookmarks.expandAll",
           "when": "view == aiBookmarks",
-          "group": "navigation"
+          "group": "navigation@2"
         },
         {
           "command": "aiBookmarks.collapseAll",
           "when": "view == aiBookmarks",
-          "group": "navigation"
+          "group": "navigation@3"
+        },
+        {
+          "command": "aiBookmarks.createGroup",
+          "when": "view == aiBookmarks",
+          "group": "navigation@4"
+        },
+        {
+          "command": "aiBookmarks.refresh",
+          "when": "view == aiBookmarks",
+          "group": "navigation@5"
+        },
+        {
+          "command": "aiBookmarks.toggleViewMode",
+          "when": "view == aiBookmarks",
+          "group": "navigation@6"
+        },
+        {
+          "command": "aiBookmarks.exportMarkdown",
+          "when": "view == aiBookmarks"
         }
       ],
       "view/item/context": [

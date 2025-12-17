@@ -1,13 +1,9 @@
-// Bookmark category types
+// Bookmark category types (精简为4个)
 export type BookmarkCategory =
   | 'entry-point'    // 入口点
   | 'core-logic'     // 核心逻辑
-  | 'todo'           // 待办
-  | 'bug'            // 已知问题
-  | 'optimization'   // 可优化
-  | 'explanation'    // 纯解释
-  | 'warning'        // 注意事项
-  | 'reference';     // 参考资料
+  | 'issue'          // 问题/待办 (合并 todo, bug, warning)
+  | 'note';          // 备注/说明 (合并 explanation, reference, optimization)
 
 // Single bookmark
 export interface Bookmark {

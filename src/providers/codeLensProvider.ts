@@ -59,12 +59,8 @@ function getCategoryIcon(category?: string): string {
   switch (category) {
     case 'entry-point': return '\u25B6'; // Play symbol
     case 'core-logic': return '\u2699';  // Gear
-    case 'todo': return '\u2610';        // Checkbox
-    case 'bug': return '\u2717';         // X mark
-    case 'optimization': return '\u26A1'; // Lightning
-    case 'warning': return '\u26A0';     // Warning
-    case 'explanation': return '\u2139'; // Info
-    case 'reference': return '\u2197';   // Arrow
+    case 'issue': return '\u26A0';       // Warning (bug/todo/warning)
+    case 'note': return '\u2139';        // Info (explanation/reference)
     default: return '\u2691';            // Flag
   }
 }

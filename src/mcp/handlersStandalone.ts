@@ -71,8 +71,7 @@ export class MCPHandlersStandalone {
       }
 
       const validCategories: BookmarkCategory[] = [
-        'entry-point', 'core-logic', 'todo', 'bug',
-        'optimization', 'explanation', 'warning', 'reference'
+        'entry-point', 'core-logic', 'issue', 'note'
       ];
       if (category && !validCategories.includes(category)) {
         return {
@@ -135,8 +134,7 @@ export class MCPHandlersStandalone {
       }
 
       const validCategories: BookmarkCategory[] = [
-        'entry-point', 'core-logic', 'todo', 'bug',
-        'optimization', 'explanation', 'warning', 'reference'
+        'entry-point', 'core-logic', 'issue', 'note'
       ];
       if (category && !validCategories.includes(category)) {
         return {
@@ -215,8 +213,7 @@ export class MCPHandlersStandalone {
       const { groupId, parentId, includeDescendants, filePath, category, tags } = args;
 
       const validCategories: BookmarkCategory[] = [
-        'entry-point', 'core-logic', 'todo', 'bug',
-        'optimization', 'explanation', 'warning', 'reference'
+        'entry-point', 'core-logic', 'issue', 'note'
       ];
       if (category && !validCategories.includes(category)) {
         return {
@@ -310,8 +307,7 @@ export class MCPHandlersStandalone {
       }
 
       const validCategories: BookmarkCategory[] = [
-        'entry-point', 'core-logic', 'todo', 'bug',
-        'optimization', 'explanation', 'warning', 'reference'
+        'entry-point', 'core-logic', 'issue', 'note'
       ];
       if (category && !validCategories.includes(category)) {
         return {
@@ -587,8 +583,7 @@ export class MCPHandlersStandalone {
       }
 
       const validCategories: BookmarkCategory[] = [
-        'entry-point', 'core-logic', 'todo', 'bug',
-        'optimization', 'explanation', 'warning', 'reference'
+        'entry-point', 'core-logic', 'issue', 'note'
       ];
 
       const results: Array<{ index: number; bookmarkId?: string; error?: string }> = [];

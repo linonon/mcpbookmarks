@@ -184,12 +184,8 @@ interface Bookmark {
 type BookmarkCategory = 
   | 'entry-point'      // 入口點
   | 'core-logic'       // 核心邏輯
-  | 'todo'             // 待辦
-  | 'bug'              // 已知問題
-  | 'optimization'     // 可優化
-  | 'explanation'      // 純解釋
-  | 'warning'          // 注意事項
-  | 'reference';       // 參考資料
+  | 'issue'            // 問題/待辦 (合併 todo, bug, warning)
+  | 'note';            // 備註/說明 (合併 explanation, reference, optimization)
 ```
 
 ### BookmarkStore
@@ -523,8 +519,8 @@ Step 4: 編輯標籤（逗號分隔）
   },
   "aiBookmarks.defaultCategory": {
     "type": "string",
-    "enum": ["entry-point", "core-logic", "todo", "bug", "optimization", "explanation", "warning", "reference"],
-    "default": "explanation",
+    "enum": ["entry-point", "core-logic", "issue", "note"],
+    "default": "note",
     "description": "新書籤的默認分類"
   },
   "aiBookmarks.confirmBeforeDelete": {
@@ -824,7 +820,7 @@ add_bookmark({
   order: 1,
   title: "精度問題",
   description: "float64 計算 multiplier 可能有精度累積誤差，建議使用 decimal 庫",
-  category: "optimization",
+  category: "note",
   tags: ["precision", "math"]
 })
 
@@ -834,7 +830,7 @@ add_bookmark({
   order: 2,
   title: "並發安全",
   description: "結算時遍歷玩家 map 沒有加鎖，可能導致 concurrent map iteration",
-  category: "bug",
+  category: "issue",
   tags: ["concurrency", "critical"]
 })
 ```

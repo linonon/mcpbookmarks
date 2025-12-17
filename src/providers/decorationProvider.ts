@@ -2,16 +2,12 @@ import * as vscode from 'vscode';
 import { BookmarkStoreManager } from '../store/bookmarkStore';
 import { parseLocation, normalizePath } from '../utils';
 
-// Category colors
+// Category colors (simplified to 4 categories)
 const CATEGORY_COLORS: Record<string, string> = {
   'entry-point': '#4CAF50',   // Green
   'core-logic': '#2196F3',    // Blue
-  'todo': '#FF9800',          // Orange
-  'bug': '#F44336',           // Red
-  'optimization': '#9C27B0',  // Purple
-  'explanation': '#607D8B',   // Gray
-  'warning': '#FFC107',       // Amber
-  'reference': '#00BCD4'      // Cyan
+  'issue': '#FFC107',         // Amber (warning/bug/todo)
+  'note': '#607D8B'           // Gray (explanation/reference)
 };
 
 const DEFAULT_COLOR = '#888888';

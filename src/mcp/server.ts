@@ -110,7 +110,7 @@ CORRECT: 1. handleRequest (parent) â†’ 1.1 validateInput (child at call site) â†
         },
         category: {
           type: 'string',
-          enum: ['entry-point', 'core-logic', 'todo', 'bug', 'optimization', 'explanation', 'warning', 'reference'],
+          enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Bookmark category'
         },
         tags: {
@@ -168,7 +168,7 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         category: {
           type: 'string',
-          enum: ['entry-point', 'core-logic', 'todo', 'bug', 'optimization', 'explanation', 'warning', 'reference'],
+          enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Bookmark category'
         },
         tags: {
@@ -218,7 +218,7 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         category: {
           type: 'string',
-          enum: ['entry-point', 'core-logic', 'todo', 'bug', 'optimization', 'explanation', 'warning', 'reference'],
+          enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'Filter by category'
         },
         tags: {
@@ -283,7 +283,7 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         category: {
           type: 'string',
-          enum: ['entry-point', 'core-logic', 'todo', 'bug', 'optimization', 'explanation', 'warning', 'reference'],
+          enum: ['entry-point', 'core-logic', 'issue', 'note'],
           description: 'New category'
         },
         tags: {
@@ -412,7 +412,7 @@ Example: After creating a parent bookmark for "handleRequest", use batch_add_boo
               },
               category: {
                 type: 'string',
-                enum: ['entry-point', 'core-logic', 'todo', 'bug', 'optimization', 'explanation', 'warning', 'reference'],
+                enum: ['entry-point', 'core-logic', 'issue', 'note'],
                 description: 'Bookmark category'
               },
               tags: {

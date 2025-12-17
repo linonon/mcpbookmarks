@@ -177,12 +177,8 @@ export function getCategoryDisplayName(category: string): string {
   const names: Record<string, string> = {
     'entry-point': 'Entry Point',
     'core-logic': 'Core Logic',
-    'todo': 'TODO',
-    'bug': 'Bug',
-    'optimization': 'Optimization',
-    'explanation': 'Explanation',
-    'warning': 'Warning',
-    'reference': 'Reference'
+    'issue': 'Issue',
+    'note': 'Note'
   };
   return names[category] || category;
 }
@@ -194,12 +190,8 @@ export function getCategoryIcon(category?: string): string {
   const icons: Record<string, string> = {
     'entry-point': 'entry-point',
     'core-logic': 'core-logic',
-    'todo': 'todo',
-    'bug': 'bug',
-    'optimization': 'optimization',
-    'explanation': 'explanation',
-    'warning': 'warning',
-    'reference': 'reference'
+    'issue': 'issue',
+    'note': 'note'
   };
   return icons[category || ''] || 'bookmark';
 }

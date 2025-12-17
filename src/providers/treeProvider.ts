@@ -4,16 +4,12 @@ import { BookmarkStoreManager } from '../store/bookmarkStore';
 import { BookmarkGroup, Bookmark, BookmarkCategory, BookmarkWithChildren } from '../store/types';
 import { parseLocation, getCategoryDisplayName } from '../utils';
 
-// Category icon and color mapping (matching prototype design)
+// Category icon and color mapping (simplified to 4 categories)
 const CATEGORY_STYLES: Record<string, { icon: string; color: string }> = {
   'entry-point': { icon: 'debug-start', color: 'charts.green' },
   'core-logic': { icon: 'symbol-method', color: 'charts.blue' },
-  'todo': { icon: 'checklist', color: 'charts.yellow' },
-  'bug': { icon: 'bug', color: 'errorForeground' },
-  'optimization': { icon: 'rocket', color: 'charts.orange' },
-  'explanation': { icon: 'comment-discussion', color: 'charts.purple' },
-  'warning': { icon: 'warning', color: 'editorWarning.foreground' },
-  'reference': { icon: 'link', color: 'descriptionForeground' }
+  'issue': { icon: 'warning', color: 'editorWarning.foreground' },
+  'note': { icon: 'comment-discussion', color: 'charts.purple' }
 };
 
 function getCategoryThemeIcon(category?: BookmarkCategory): vscode.ThemeIcon {

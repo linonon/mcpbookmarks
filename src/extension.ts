@@ -360,12 +360,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
       const categories = [
         { label: 'entry-point', description: 'Entry point to a feature or module' },
         { label: 'core-logic', description: 'Core business logic' },
-        { label: 'todo', description: 'Something to be done' },
-        { label: 'bug', description: 'Known bug or issue' },
-        { label: 'optimization', description: 'Can be optimized' },
-        { label: 'explanation', description: 'Just an explanation' },
-        { label: 'warning', description: 'Important warning' },
-        { label: 'reference', description: 'Reference material' }
+        { label: 'issue', description: 'Problem, bug, or todo item' },
+        { label: 'note', description: 'Explanation or reference' }
       ];
 
       const selectedCategory = await vscode.window.showQuickPick(categories, {
@@ -593,12 +589,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
             { label: 'None', description: 'No category' },
             { label: 'entry-point', description: 'Entry point' },
             { label: 'core-logic', description: 'Core logic' },
-            { label: 'todo', description: 'TODO' },
-            { label: 'bug', description: 'Bug' },
-            { label: 'optimization', description: 'Optimization' },
-            { label: 'explanation', description: 'Explanation' },
-            { label: 'warning', description: 'Warning' },
-            { label: 'reference', description: 'Reference' }
+            { label: 'issue', description: 'Issue' },
+            { label: 'note', description: 'Note' }
           ];
           const newCat = await vscode.window.showQuickPick(categories, {
             placeHolder: 'Select new category'
@@ -970,12 +962,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
       const categories = [
         { label: 'entry-point', description: 'Entry point to a feature or module' },
         { label: 'core-logic', description: 'Core business logic' },
-        { label: 'todo', description: 'Something to be done' },
-        { label: 'bug', description: 'Known bug or issue' },
-        { label: 'optimization', description: 'Can be optimized' },
-        { label: 'explanation', description: 'Just an explanation' },
-        { label: 'warning', description: 'Important warning' },
-        { label: 'reference', description: 'Reference material' }
+        { label: 'issue', description: 'Problem, bug, or todo item' },
+        { label: 'note', description: 'Explanation or reference' }
       ];
 
       const selectedCategory = await vscode.window.showQuickPick(categories, {

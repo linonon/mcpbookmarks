@@ -41,6 +41,7 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [
+        vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview'),
         vscode.Uri.joinPath(this.extensionUri, 'src', 'webview')
       ]
     };
@@ -368,9 +369,17 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
    * 获取 HTML 内容
    */
   private getHtmlContent(webview: vscode.Webview): string {
-    const htmlPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.html');
-    const cssPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.css');
-    const jsPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.js');
+    // 尝试打包后的路径 (dist/webview), 如果失败则使用开发路径 (src/webview)
+    let htmlPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'sidebar.html');
+    let cssPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'sidebar.css');
+    let jsPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'sidebar.js');
+
+    // 如果打包路径不存在, 使用开发路径
+    if (!fs.existsSync(htmlPath.fsPath)) {
+      htmlPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.html');
+      cssPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.css');
+      jsPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'sidebar.js');
+    }
 
     const cssUri = webview.asWebviewUri(cssPath);
     const jsUri = webview.asWebviewUri(jsPath);

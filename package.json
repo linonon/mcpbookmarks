@@ -59,7 +59,8 @@
       },
       {
         "command": "aiBookmarks.createGroup",
-        "title": "New Group"
+        "title": "New Group",
+        "icon": "$(add)"
       },
       {
         "command": "aiBookmarks.exportMarkdown",
@@ -377,9 +378,10 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "npm run compile:extension && npm run compile:mcp",
+    "compile": "npm run compile:extension && npm run compile:mcp && npm run copy:webview",
     "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "compile:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node",
+    "copy:webview": "mkdir -p dist/webview && cp -r src/webview/* dist/webview/",
     "watch": "npm run watch:extension & npm run watch:mcp",
     "watch:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
     "watch:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node --watch",

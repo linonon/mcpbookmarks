@@ -47,6 +47,7 @@ export class BookmarkDetailProvider {
       {
         enableScripts: true,
         localResourceRoots: [
+          vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview'),
           vscode.Uri.joinPath(this.extensionUri, 'src', 'webview')
         ]
       }
@@ -191,10 +192,17 @@ export class BookmarkDetailProvider {
   }
 
   private getWebviewContent(webview: vscode.Webview): string {
-    // 读取 HTML 模板文件
-    const htmlPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.html');
-    const cssPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.css');
-    const jsPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.js');
+    // 尝试打包后的路径 (dist/webview), 如果失败则使用开发路径 (src/webview)
+    let htmlPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'detailPanel.html');
+    let cssPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'detailPanel.css');
+    let jsPath = vscode.Uri.joinPath(this.extensionUri, 'dist', 'webview', 'detailPanel.js');
+
+    // 如果打包路径不存在, 使用开发路径
+    if (!fs.existsSync(htmlPath.fsPath)) {
+      htmlPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.html');
+      cssPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.css');
+      jsPath = vscode.Uri.joinPath(this.extensionUri, 'src', 'webview', 'detailPanel.js');
+    }
 
     // 转换为 Webview URI
     const cssUri = webview.asWebviewUri(cssPath);

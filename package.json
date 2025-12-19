@@ -360,18 +360,6 @@
           "type": "boolean",
           "default": true,
           "description": "Show confirmation dialog before deleting bookmarks or groups"
-        },
-        "aiBookmarks.showInlineDescription": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show bookmark description preview in tree view"
-        },
-        "aiBookmarks.inlineDescriptionLength": {
-          "type": "number",
-          "default": 50,
-          "minimum": 10,
-          "maximum": 200,
-          "description": "Maximum characters to show in description preview"
         }
       }
     }

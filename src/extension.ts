@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { BookmarkStoreManager } from './store/bookmarkStore';
-import { BookmarkTreeProvider } from './providers/treeProvider';
 import { BookmarkSidebarProvider } from './providers/sidebarProvider';
 import { DecorationProvider } from './providers/decorationProvider';
 import { BookmarkHoverProvider } from './providers/hoverProvider';
@@ -11,7 +10,6 @@ import { Bookmark, BookmarkGroup } from './store/types';
 import { parseLocation, toAbsolutePath } from './utils';
 
 let bookmarkStore: BookmarkStoreManager | undefined;
-let treeProvider: BookmarkTreeProvider | undefined;
 let sidebarProvider: BookmarkSidebarProvider | undefined;
 let decorationProvider: DecorationProvider | undefined;
 let codeLensProvider: BookmarkCodeLensProvider | undefined;
@@ -32,9 +30,6 @@ export function activate(context: vscode.ExtensionContext): void {
 
   // Initialize bookmark store
   bookmarkStore = new BookmarkStoreManager(workspaceRoot);
-
-  // Initialize tree provider (kept for internal use)
-  treeProvider = new BookmarkTreeProvider(bookmarkStore);
 
   // Initialize and register sidebar webview provider
   sidebarProvider = new BookmarkSidebarProvider(context.extensionUri, bookmarkStore, workspaceRoot);
@@ -118,7 +113,6 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push({
     dispose: () => {
       bookmarkStore?.dispose();
-      treeProvider?.dispose();
       sidebarProvider?.dispose();
       decorationProvider?.dispose();
     }
@@ -1154,7 +1148,6 @@ async function navigateBookmark(direction: 'next' | 'prev', workspaceRoot: strin
 
 export function deactivate(): void {
   bookmarkStore?.dispose();
-  treeProvider?.dispose();
   decorationProvider?.dispose();
   codeLensProvider?.dispose();
   detailProvider?.dispose();

@@ -102,7 +102,14 @@ CORRECT: 1. handleRequest (parent) â†’ 1.1 validateInput (child at call site) â†
         },
         location: {
           type: 'string',
-          description: 'Location in format "path/to/file:line" or "path/to/file:start-end" for ranges'
+          description: `Location in format "path/to/file:line" or "path/to/file:start-end" for ranges
+
+**PATH FORMAT - CRITICAL:**
+- **Relative path** (recommended): Use path relative to the project root (e.g., "src/game/crash.go:45")
+- **Absolute path**: Use absolute path if you are analyzing a different project (e.g., "/Users/name/project/src/main.go:100")
+- The extension will try relative path first, then fall back to absolute path if the file is not found
+- When using Serena MCP or analyzing files with absolute paths, use the absolute path in the location
+- When analyzing the current project, use relative paths for better portability`
         },
         title: {
           type: 'string',
@@ -182,7 +189,14 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         location: {
           type: 'string',
-          description: 'Location in format "path/to/file:line" or "path/to/file:start-end" for ranges'
+          description: `Location in format "path/to/file:line" or "path/to/file:start-end" for ranges
+
+**PATH FORMAT - CRITICAL:**
+- **Relative path** (recommended): Use path relative to the project root (e.g., "src/game/crash.go:45")
+- **Absolute path**: Use absolute path if you are analyzing a different project (e.g., "/Users/name/project/src/main.go:100")
+- The extension will try relative path first, then fall back to absolute path if the file is not found
+- When using Serena MCP or analyzing files with absolute paths, use the absolute path in the location
+- When analyzing the current project, use relative paths for better portability`
         },
         title: {
           type: 'string',

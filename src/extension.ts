@@ -194,11 +194,10 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         return;
       }
 
-      try {
-        const parsed = parseLocation(bookmark.location);
-        const absolutePath = toAbsolutePath(parsed.filePath, workspaceRoot);
-        const uri = vscode.Uri.file(absolutePath);
+      const parsed = parseLocation(bookmark.location);
 
+      // Helper to open and jump to document
+      const jumpToDocument = async (uri: vscode.Uri) => {
         const document = await vscode.workspace.openTextDocument(uri);
         const editor = await vscode.window.showTextDocument(document);
 
@@ -213,8 +212,27 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
 
         editor.selection = new vscode.Selection(range.start, range.end);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+      };
+
+      try {
+        // 1. 先尝试相对路径(相对于当前工作区)
+        const relativePath = toAbsolutePath(parsed.filePath, workspaceRoot);
+        const uri = vscode.Uri.file(relativePath);
+        await jumpToDocument(uri);
       } catch (error) {
-        vscode.window.showErrorMessage(`Failed to jump to bookmark: ${error}`);
+        // 2. 如果失败, 尝试将路径作为绝对路径
+        // 这种情况适用于: AI 在别的项目中创建书签时使用了绝对路径
+        try {
+          const absoluteUri = vscode.Uri.file(parsed.filePath);
+          await jumpToDocument(absoluteUri);
+          console.log(`Jumped to bookmark using absolute path: ${parsed.filePath}`);
+        } catch (error2) {
+          vscode.window.showErrorMessage(
+            `Failed to jump to bookmark "${bookmark.title}".\n` +
+            `Tried relative path (${parsed.filePath}) and absolute path.\n` +
+            `Error: ${error2}`
+          );
+        }
       }
     })
   );

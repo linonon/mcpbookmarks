@@ -256,7 +256,17 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
 
       case 'editGroup':
         if (message.groupId) {
-          vscode.commands.executeCommand('aiBookmarks.editGroup', { id: message.groupId });
+          const group = this.bookmarkStore.getGroup(message.groupId);
+          if (group) {
+            vscode.commands.executeCommand('aiBookmarks.editGroup', {
+              type: 'group',
+              group: {
+                id: group.id,
+                name: group.name,
+                description: group.description
+              }
+            });
+          }
         }
         break;
 

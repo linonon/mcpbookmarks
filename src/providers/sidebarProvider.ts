@@ -4,6 +4,7 @@ import * as path from 'path';
 import { BookmarkStoreManager } from '../store/bookmarkStore';
 import { BookmarkGroup, Bookmark } from '../store/types';
 import { parseLocation, toAbsolutePath } from '../utils';
+import { ConfigManager } from '../config/settings';
 
 export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'aiBookmarks';
@@ -28,6 +29,13 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
     this._disposables.push(
       this.bookmarkStore.onDidChange(() => {
         this.refresh();
+      })
+    );
+
+    // 监听字体配置变化, 更新 CSS 变量
+    this._disposables.push(
+      ConfigManager.onConfigChanged(() => {
+        this.updateFontSize();
       })
     );
   }
@@ -84,6 +92,24 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
         groups,
         viewMode
       }
+    });
+
+    // 同时发送字体配置
+    this.updateFontSize();
+  }
+
+  /**
+   * 更新字体大小配置
+   */
+  private updateFontSize(): void {
+    if (!this._view) {
+      return;
+    }
+
+    const fontSize = ConfigManager.getFontSizeConfig();
+    this._view.webview.postMessage({
+      type: 'updateFontSize',
+      config: fontSize
     });
   }
 
@@ -171,6 +197,8 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
     message?: string;
     description?: string;
     location?: string;
+    path?: string;
+    line?: number;
     updates?: { title: string; location: string; description: string };
     payload?: any;
   }): Promise<void> {
@@ -340,6 +368,12 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
         }
         break;
 
+      case 'openFile':
+        if (message.path) {
+          await this.openFileFromWebview(message.path, message.line);
+        }
+        break;
+
       default:
         console.warn(`Unknown message type: ${message.type}`);
     }
@@ -377,6 +411,47 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
       editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
     } catch (error) {
       vscode.window.showErrorMessage(`Failed to jump to bookmark: ${error}`);
+    }
+  }
+
+  /**
+   * 从 webview 打开文件
+   */
+  private async openFileFromWebview(filePath: string, line?: number): Promise<void> {
+    try {
+      const jumpToDocument = async (uri: vscode.Uri) => {
+        const document = await vscode.workspace.openTextDocument(uri);
+        const editor = await vscode.window.showTextDocument(document);
+
+        if (line !== undefined) {
+          const targetLine = Math.max(0, line - 1);
+          const position = new vscode.Position(targetLine, 0);
+          editor.selection = new vscode.Selection(position, position);
+          editor.revealRange(
+            new vscode.Range(position, position),
+            vscode.TextEditorRevealType.InCenter
+          );
+        }
+      };
+
+      try {
+        // 先尝试相对路径
+        const relativePath = toAbsolutePath(filePath, this.workspaceRoot);
+        const uri = vscode.Uri.file(relativePath);
+        await jumpToDocument(uri);
+      } catch (error) {
+        try {
+          // 如果相对路径失败, 尝试绝对路径
+          const absoluteUri = vscode.Uri.file(filePath);
+          await jumpToDocument(absoluteUri);
+        } catch (error2) {
+          vscode.window.showErrorMessage(
+            `Failed to open file "${filePath}".\nError: ${error2}`
+          );
+        }
+      }
+    } catch (error) {
+      vscode.window.showErrorMessage(`Failed to open file: ${error}`);
     }
   }
 

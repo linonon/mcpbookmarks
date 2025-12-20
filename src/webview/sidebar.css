@@ -16,6 +16,12 @@
   --flow-line-width: 1px;
   --order-circle-size: 20px;
   --indent-size: 36px;
+
+  /* Font Sizes - 可通过配置动态覆盖 */
+  --font-size-title: 13px;          /* 书签标题字体大小 */
+  --font-size-description: 11px;    /* 书签描述字体大小 */
+  --font-size-group-name: 14px;     /* 分组名称字体大小 */
+  --font-size-location: 10px;       /* 文件位置字体大小 */
 }
 
 /* Base Styles */
@@ -337,7 +343,7 @@ body {
 }
 
 .group-name {
-  font-size: 14px;        /* 从 13px 增大到 14px */
+  font-size: var(--font-size-group-name);
   font-weight: 700;       /* 从 600 加粗到 700 */
   white-space: nowrap;
   overflow: hidden;
@@ -707,7 +713,7 @@ body {
 }
 
 .bookmark-title {
-  font-size: 13px;
+  font-size: var(--font-size-title);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -723,7 +729,7 @@ body {
 }
 
 .bookmark-location {
-  font-size: 10px;
+  font-size: var(--font-size-location);
   color: var(--vscode-descriptionForeground);
   font-family: var(--vscode-editor-font-family);
   white-space: nowrap;
@@ -919,7 +925,7 @@ body {
 .bookmark-description {
   flex: 1;                   /* 占用剩余空间 */
   order: 1;                  /* 排在按钮之后(右侧) */
-  font-size: 11px;
+  font-size: var(--font-size-description);
   color: #ffffff;
   opacity: 0.7;
   cursor: default;
@@ -1199,6 +1205,23 @@ body {
 .bookmark-description del {
   text-decoration: line-through;
   opacity: 0.6;
+}
+
+/* 文件链接样式 */
+.bookmark-description .file-link {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.bookmark-description .file-link:hover {
+  color: var(--vscode-textLink-activeForeground);
+  text-decoration: underline;
+}
+
+.bookmark-description .file-link:active {
+  color: var(--vscode-textLink-activeForeground);
 }
 
 /* ==================== 编辑模式样式 ==================== */

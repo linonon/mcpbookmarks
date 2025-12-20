@@ -211,6 +211,49 @@ interface BookmarkStore {
 
 存儲位置：`.vscode/ai-bookmarks.json`
 
+## Markdown Link Support in Descriptions
+
+書籤的 description 字段支持 Markdown 鏈接語法,實現代碼位置間的快速跳轉。
+
+### 語法
+
+```markdown
+[顯示文本](文件路徑)         # 跳轉到文件
+[顯示文本](文件路徑:行號)    # 跳轉到具體行
+```
+
+### 路徑格式
+
+- **相對路徑** (推薦): `src/game/crash.go:45`
+- **絕對路徑**: `/Users/name/project/src/main.go:100`
+- 優先使用相對路徑以提高可移植性
+
+### 使用場景
+
+- **關聯函數引用**: "調用入口見 [main function](src/main.go:15)"
+- **配置文件說明**: "參數配置在 [config](config/app.toml:23-30)"
+- **錯誤處理指引**: "異常處理邏輯見 [error handler](src/errors/handler.go:78)"
+- **狀態機跳轉**: "狀態定義見 [state machine](src/game/state.go:45-120)"
+
+### 示例
+
+```markdown
+驗證下注金額和用戶餘額
+
+1. **餘額檢查**: 用戶錢包餘額必須足夠 (見 [Wallet.Balance](src/wallet/balance.go:78))
+2. **限額檢查**: 金額在 min-max 範圍內 (配置 [game.toml](config/game.toml:12))
+3. **狀態檢查**: 遊戲在下注階段 (狀態機 [state.go](src/game/state.go:45-120))
+
+> 失敗會拋出 InvalidBetError,處理見 [handler](src/errors/handler.go:33)
+```
+
+### AI 使用建議
+
+- 在解釋代碼調用關係時主動添加鏈接
+- 引用配置、常量、類型定義時使用鏈接
+- 描述錯誤處理、狀態轉換時提供跳轉
+- 創建完整的代碼導航網絡
+
 ## MCP 工具定義
 
 ### create_group

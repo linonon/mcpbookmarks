@@ -39,6 +39,22 @@
     vscode.postMessage({ type: 'ready' });
   }
 
+  /**
+   * 更新字体大小 CSS 变量
+   * @param {Object} config - 字体配置对象
+   * @param {number} config.title - 标题字体大小
+   * @param {number} config.description - 描述字体大小
+   * @param {number} config.groupName - 分组名称字体大小
+   * @param {number} config.location - 位置字体大小
+   */
+  function updateFontSize(config) {
+    const root = document.documentElement;
+    root.style.setProperty('--font-size-title', `${config.title}px`);
+    root.style.setProperty('--font-size-description', `${config.description}px`);
+    root.style.setProperty('--font-size-group-name', `${config.groupName}px`);
+    root.style.setProperty('--font-size-location', `${config.location}px`);
+  }
+
   // 设置事件监听
   function setupEventListeners() {
     // Header buttons
@@ -127,6 +143,11 @@
         if (saveBtn) {
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save';
+        }
+        break;
+      case 'updateFontSize':
+        if (message.config) {
+          updateFontSize(message.config);
         }
         break;
     }
@@ -309,6 +330,25 @@
   // 处理书签点击事件 (事件委托)
   function handleBookmarkClick(e) {
     hideContextMenu(); // 关闭可能打开的右键菜单
+
+    // 检查是否点击了文件链接
+    const fileLink = e.target.closest('.file-link');
+    if (fileLink) {
+      e.preventDefault();
+      e.stopPropagation();
+
+      const filePath = fileLink.getAttribute('data-file-path');
+      const lineStr = fileLink.getAttribute('data-line');
+      const line = lineStr ? parseInt(lineStr, 10) : undefined;
+
+      // 发送消息到扩展打开文件
+      vscode.postMessage({
+        type: 'openFile',
+        path: filePath,
+        line: line
+      });
+      return;
+    }
 
     // 检查是否点击了编辑按钮
     const editBtn = e.target.closest('.bookmark-header-edit-btn');
@@ -1258,23 +1298,54 @@
     }
 
     try {
+      // 配置 marked 的自定义渲染器来处理链接
+      const renderer = new marked.Renderer();
+      
+      // 自定义链接渲染: 将 [text](path) 或 [text](path:line) 转换为可点击的链接
+      renderer.link = function(href, title, text) {
+        // 解析文件路径和行号
+        let filePath = href;
+        let line = undefined;
+        
+        const colonIndex = href.lastIndexOf(':');
+        if (colonIndex > 0) {
+          const beforeColon = href.substring(0, colonIndex);
+          const afterColon = href.substring(colonIndex + 1);
+          
+          // 检查冒号后面是否是行号
+          const lineMatch = afterColon.match(/^(\d+)/);
+          if (lineMatch) {
+            filePath = beforeColon;
+            line = parseInt(lineMatch[1], 10);
+          }
+        }
+        
+        // 使用 data- 属性存储路径和行号信息
+        const dataAttrs = `data-file-path="${escapeHtml(filePath)}"` + 
+                         (line !== undefined ? ` data-line="${line}"` : '');
+        const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
+        
+        return `<a href="#" class="file-link" ${dataAttrs}${titleAttr}>${escapeHtml(text)}</a>`;
+      };
+
       // 配置 marked
       marked.setOptions({
         breaks: true,        // 支持换行
         gfm: true,          // GitHub Flavored Markdown
         headerIds: false,   // 禁用标题 ID
-        mangle: false       // 禁用邮箱混淆
+        mangle: false,      // 禁用邮箱混淆
+        renderer: renderer
       });
 
       // 渲染 Markdown
       const rawHtml = marked.parse(markdown);
 
-      // DOMPurify 清理
+      // DOMPurify 清理 - 现在允许 <a> 标签和 data- 属性
       const cleanHtml = DOMPurify.sanitize(rawHtml, {
-        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'pre', 'ul', 'ol', 'li', 'blockquote', 's', 'del'],
-        ALLOWED_ATTR: ['class'],
-        FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'a', 'img'],
-        FORBID_ATTR: ['onerror', 'onclick', 'onload', 'href', 'src']
+        ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'pre', 'ul', 'ol', 'li', 'blockquote', 's', 'del', 'a'],
+        ALLOWED_ATTR: ['class', 'data-file-path', 'data-line', 'title', 'href'],
+        FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'img'],
+        FORBID_ATTR: ['onerror', 'onclick', 'onload', 'src']
       });
 
       return cleanHtml;

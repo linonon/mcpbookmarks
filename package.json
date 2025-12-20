@@ -374,6 +374,41 @@
           "type": "boolean",
           "default": true,
           "description": "Show confirmation dialog before deleting bookmarks or groups"
+        },
+        "aiBookmarks.fontSize.title": {
+          "type": "number",
+          "default": 13,
+          "minimum": 8,
+          "maximum": 32,
+          "description": "书签标题的字体大小 (px)"
+        },
+        "aiBookmarks.fontSize.description": {
+          "type": "number",
+          "default": 11,
+          "minimum": 8,
+          "maximum": 28,
+          "description": "书签描述的字体大小 (px)"
+        },
+        "aiBookmarks.fontSize.groupName": {
+          "type": "number",
+          "default": 14,
+          "minimum": 10,
+          "maximum": 32,
+          "description": "分组名称的字体大小 (px)"
+        },
+        "aiBookmarks.fontSize.location": {
+          "type": "number",
+          "default": 10,
+          "minimum": 8,
+          "maximum": 20,
+          "description": "文件位置信息的字体大小 (px)"
+        },
+        "aiBookmarks.fontSize.scale": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.5,
+          "maximum": 2.5,
+          "markdownDescription": "全局字体缩放倍数。设置后会覆盖上面的独立配置。\n\n**建议**：一般情况下调整独立配置即可，此选项用于快速整体缩放。"
         }
       }
     }

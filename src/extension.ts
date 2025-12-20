@@ -1045,6 +1045,51 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
       }
     })
   );
+
+  // Open file command (for clickable links in hover)
+  context.subscriptions.push(
+    vscode.commands.registerCommand('aiBookmarks.openFile', async (args: { path: string; line?: number }) => {
+      try {
+        const { path: filePath, line } = args;
+
+        // Helper to open and jump to document
+        const jumpToDocument = async (uri: vscode.Uri) => {
+          const document = await vscode.workspace.openTextDocument(uri);
+          const editor = await vscode.window.showTextDocument(document);
+
+          if (line !== undefined) {
+            const targetLine = Math.max(0, line - 1); // Convert to 0-indexed
+            const position = new vscode.Position(targetLine, 0);
+            editor.selection = new vscode.Selection(position, position);
+            editor.revealRange(
+              new vscode.Range(position, position),
+              vscode.TextEditorRevealType.InCenter
+            );
+          }
+        };
+
+        try {
+          // 1. 先尝试相对路径(相对于当前工作区)
+          const relativePath = toAbsolutePath(filePath, workspaceRoot);
+          const uri = vscode.Uri.file(relativePath);
+          await jumpToDocument(uri);
+        } catch (error) {
+          // 2. 如果失败, 尝试将路径作为绝对路径
+          try {
+            const absoluteUri = vscode.Uri.file(filePath);
+            await jumpToDocument(absoluteUri);
+          } catch (error2) {
+            vscode.window.showErrorMessage(
+              `Failed to open file "${filePath}".\n` +
+              `Error: ${error2}`
+            );
+          }
+        }
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to parse file link: ${error}`);
+      }
+    })
+  );
 }
 
 /**

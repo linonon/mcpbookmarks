@@ -69,9 +69,10 @@ export class BookmarkHoverProvider implements vscode.HoverProvider {
       // Group as subtle info
       md.appendMarkdown(`*Group: ${group.name}*\n\n`);
 
-      // Description
+      // Description with clickable links
       if (bookmark.description) {
-        md.appendMarkdown(`${bookmark.description}\n\n`);
+        const enrichedDescription = this.enrichMarkdownLinks(bookmark.description);
+        md.appendMarkdown(`${enrichedDescription}\n\n`);
       }
 
       // Metadata on separate lines for clarity
@@ -82,5 +83,46 @@ export class BookmarkHoverProvider implements vscode.HoverProvider {
     }
 
     return md;
+  }
+
+  /**
+   * Convert markdown links [name](path) or [name](path:line) to VSCode command links
+   */
+  private enrichMarkdownLinks(text: string): string {
+    // Match [text](path) or [text](path:line) or [text](path:line-endLine)
+    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+    
+    return text.replace(linkRegex, (match, linkText, linkTarget) => {
+      try {
+        // Parse the link target
+        let filePath: string;
+        let line: number | undefined;
+        
+        // Check if it contains line number: path:line or path:line-endLine
+        const colonIndex = linkTarget.lastIndexOf(':');
+        if (colonIndex > 0) {
+          filePath = linkTarget.substring(0, colonIndex);
+          const linePartRaw = linkTarget.substring(colonIndex + 1);
+          // Extract first number (ignore range for now)
+          const lineMatch = linePartRaw.match(/^(\d+)/);
+          if (lineMatch) {
+            line = parseInt(lineMatch[1], 10);
+          }
+        } else {
+          filePath = linkTarget;
+        }
+
+        // Create VSCode command link
+        // VSCode expects arguments as a JSON array
+        const args = encodeURIComponent(JSON.stringify([{ path: filePath, line }]));
+        const commandUri = `command:aiBookmarks.openFile?${args}`;
+        
+        return `[${linkText}](${commandUri})`;
+      } catch (error) {
+        // If parsing fails, return original link
+        console.error('Failed to parse markdown link:', match, error);
+        return match;
+      }
+    });
   }
 }

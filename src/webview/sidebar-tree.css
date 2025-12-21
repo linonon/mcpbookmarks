@@ -1,14 +1,13 @@
 /* ==================== Tree 模式特定样式 (Grid 布局改进) ==================== */
 
-/* Bookmark Header - Grid 布局，确保编辑按钮统一右对齐 */
+/* Bookmark Header - Grid 布局 */
 .bookmark-header {
   display: grid;
   grid-template-columns:
     [indent] calc(var(--indent-level, 0) * 16px)
     [chevron] auto
     [badge] auto
-    [content] 1fr
-    [edit] 24px;
+    [content] 1fr;
   gap: 4px;
   align-items: center;
   padding: 4px 8px;
@@ -58,30 +57,6 @@
   opacity: 0.75;  /* 从 0.5 提高到 0.75 */
   margin-left: auto;
   font-family: 'Courier New', Courier, monospace;
-}
-
-/* 编辑按钮 - Grid 定位在 edit 列，确保统一右对齐 */
-.bookmark-header-edit-btn {
-  grid-column: edit;
-  justify-self: end;
-  width: 20px;
-  height: 20px;
-  padding: 2px;
-  border: none;
-  background: transparent;
-  color: var(--vscode-foreground);
-  opacity: 0.5;
-  cursor: pointer;
-  border-radius: 3px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: opacity 0.2s, background-color 0.2s;
-}
-
-.bookmark-header-edit-btn:hover {
-  opacity: 1;
-  background-color: var(--vscode-toolbar-hoverBackground);
 }
 
 /* Description 可见性改进 */

@@ -1588,7 +1588,7 @@ body {
 
 .view-mode-tree .bookmark-item {
 
-  border-left: 3px solid transparent !important; /* 默认透明边框 */
+  border-left: none !important; /* Tree 模式不显示左侧边框 */
 
 }
 
@@ -1786,7 +1786,7 @@ body {
 
 .view-mode-tree .bookmark-chevron {
 
-  width: 16px;
+  width: 6px;
 
   height: 16px;
 

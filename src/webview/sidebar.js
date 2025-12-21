@@ -455,16 +455,6 @@
       return;
     }
 
-    // 检查是否点击了编辑按钮
-    const editBtn = e.target.closest('.bookmark-header-edit-btn');
-    if (editBtn) {
-      e.preventDefault();
-      e.stopPropagation();
-      const bookmarkId = editBtn.getAttribute('data-bookmark-id');
-      enterFullEditMode(bookmarkId);
-      return;
-    }
-
     // 检查是否点击了 bookmark-chevron
     const chevron = e.target.closest('.bookmark-chevron');
     if (chevron) {
@@ -1274,17 +1264,8 @@
 
     switch (action) {
       case 'editBookmark':
-        // 找到对应的编辑按钮并高亮提示用户点击
-        const editBtn = document.querySelector(
-          `.bookmark-edit-btn[data-bookmark-id="${contextMenuTarget.id}"]`
-        );
-        if (editBtn) {
-          // 添加高亮动画提示
-          editBtn.classList.add('edit-hint');
-          setTimeout(() => editBtn.classList.remove('edit-hint'), 2000);
-        }
-        // 通知扩展显示提示消息
-        vscode.postMessage({ type: 'editBookmark', bookmarkId: contextMenuTarget.id });
+        // 直接进入编辑模式
+        enterFullEditMode(contextMenuTarget.id);
         break;
       case 'deleteBookmark':
         vscode.postMessage({ type: 'deleteBookmark', bookmarkId: contextMenuTarget.id });

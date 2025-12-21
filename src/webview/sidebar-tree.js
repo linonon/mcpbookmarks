@@ -26,17 +26,12 @@ function renderBookmarkHeaderTree(bookmark, hasChildren, isCollapsed, depth = 0)
   return `
     <div class="bookmark-header" style="--indent-level: ${depth}">
       <div class="bookmark-indent"></div>
-      ${hasChildren ? `<span class="bookmark-chevron"><span class="icon ${isCollapsed ? 'icon-expand' : 'icon-collapse'}"></span></span>` : ''}
+      <span class="bookmark-chevron">${hasChildren ? `<span class="icon ${isCollapsed ? 'icon-expand' : 'icon-collapse'}"></span>` : ''}</span>
       ${bookmark.order ? `<span class="order-badge">${bookmark.order}</span>` : ''}
       <div class="bookmark-title-location">
         <span class="bookmark-title">${escapeHtml(bookmark.title)}</span>
         <span class="bookmark-location">${escapeHtml(formatLocation(bookmark.location))}</span>
       </div>
-      <button class="bookmark-header-edit-btn"
-              data-bookmark-id="${escapeHtml(bookmark.id)}"
-              title="Edit bookmark">
-        <span class="icon icon-edit"></span>
-      </button>
     </div>
   `.trim();
 }

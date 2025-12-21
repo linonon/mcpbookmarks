@@ -24,14 +24,9 @@ function renderBookmarkHeaderNested(bookmark, hasChildren, isCollapsed) {
 
   return `
     <div class="bookmark-header">
-      ${hasChildren ? `<span class="bookmark-chevron"><span class="icon ${isCollapsed ? 'icon-expand' : 'icon-collapse'}"></span></span>` : ''}
+      <span class="bookmark-chevron">${hasChildren ? `<span class="icon ${isCollapsed ? 'icon-expand' : 'icon-collapse'}"></span>` : ''}</span>
       <span class="bookmark-title">${escapeHtml(bookmark.title)}</span>
       <span class="bookmark-location">${escapeHtml(formatLocation(bookmark.location))}</span>
-      <button class="bookmark-header-edit-btn"
-              data-bookmark-id="${escapeHtml(bookmark.id)}"
-              title="Edit bookmark">
-        <span class="icon icon-edit"></span>
-      </button>
     </div>
   `.trim();
 }

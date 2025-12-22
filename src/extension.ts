@@ -1128,12 +1128,12 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         {
           label: 'Claude Code',
           description: 'Auto-updates with extension, no npm required',
-          command: `claude mcp add -s local mcp-bookmarks -- node "${launcherPath}"`
+          command: `claude mcp add -s user mcp-bookmarks -- node "${launcherPath}"`
         },
         {
           label: 'Gemini',
           description: 'Auto-updates with extension, no npm required',
-          command: `gemini mcp add -s local mcp-bookmarks -- node "${launcherPath}"`
+          command: `gemini mcp add -s user mcp-bookmarks node "${launcherPath}"`
         },
         {
           label: 'VSCode (Manual Configuration)',

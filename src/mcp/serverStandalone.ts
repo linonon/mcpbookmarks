@@ -29,7 +29,7 @@ Without calling this tool first, bookmarks will be saved to the wrong location (
 Example: If you're working on a project at /Users/name/projects/myapp, call:
 set_workspace({ path: "/Users/name/projects/myapp" })
 
-Then all subsequent bookmark operations will save to /Users/name/projects/myapp/.vscode/ai-bookmarks.json`,
+Then all subsequent bookmark operations will save to /Users/name/projects/myapp/.vscode/mcp-bookmarks.json`,
     inputSchema: {
       type: 'object',
       properties: {
@@ -75,6 +75,11 @@ Then all subsequent bookmark operations will save to /Users/name/projects/myapp/
   {
     name: 'add_bookmark',
     description: `Add a bookmark to a group. Bookmarks mark important code locations with explanations. Supports hierarchical bookmarks via parentId.
+
+**NEW: Markdown links in descriptions!**
+- Link to files: [config](src/config.ts)
+- Link to specific lines: [handler](src/handler.ts:45)
+- Create cross-references between code locations
 
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
 - You MUST use Grep tool to search and confirm the EXACT line number before adding a bookmark
@@ -143,7 +148,14 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child at call site) �
         },
         location: {
           type: 'string',
-          description: 'Location in format "path/to/file:line" or "path/to/file:start-end" for ranges'
+          description: `Location in format "path/to/file:line" or "path/to/file:start-end" for ranges
+
+**PATH FORMAT - CRITICAL:**
+- **Relative path** (recommended): Use path relative to the project root (e.g., "src/game/crash.go:45")
+- **Absolute path**: Use absolute path if you are analyzing a different project (e.g., "/Users/name/project/src/main.go:100")
+- The extension will try relative path first, then fall back to absolute path if the file is not found
+- When using Serena MCP or analyzing files with absolute paths, use the absolute path in the location
+- When analyzing the current project, use relative paths for better portability`
         },
         title: {
           type: 'string',
@@ -151,7 +163,36 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child at call site) �
         },
         description: {
           type: 'string',
-          description: 'Detailed explanation of what this code does and why it matters.'
+          description: `Explanation of what this code does.
+
+**CROSS-REFERENCE TIP:**
+When describing related code, use Markdown links for easy navigation:
+- Same file: [other function](src/file.ts:100)
+- Different file: [config setup](src/config/init.ts:25)
+- Entry point: [see main flow](src/main.ts:15)
+
+**DESCRIPTION FORMAT:**
+- **First line**: Brief summary of what this line/block does (one sentence, plain text)
+- **Following lines** (optional): If more details needed, add blank line then use Markdown for rich formatting
+
+**Markdown features** (use ONLY after first line):
+- Use **bold**, *italic*, \`code\`, ~~strikethrough~~ for emphasis
+- **Use file links**: [text](path/to/file) or [text](path/to/file:123) for clickable navigation
+- Use numbered lists (1. 2. 3.) or bullet lists (- item)
+- Use code blocks with \`\`\`language\\n...\\n\`\`\` for multi-line code
+- Use > for blockquotes and important notes
+
+**Example description with cross-references:**
+\`\`\`
+验证用户下注是否合法, 包括余额、限额和游戏状态检查
+
+检查细节:
+1. **余额检查**: 用户钱包余额 >= 下注金额 (参见 [wallet.Balance](src/wallet/balance.go:78))
+2. **限额检查**: 下注金额在 \`minBet\` - \`maxBet\` 范围内 (配置见 [game config](src/config/game.toml:12-15))
+3. **状态检查**: 游戏当前状态为 \`BETTING_PHASE\` (状态机见 [state machine](src/game/state.go:45-120))
+
+> 注意: 验证失败会抛出 \`InvalidBetError\` 异常, 错误处理见 [error handler](src/errors/handler.go:33)
+\`\`\``
         },
         order: {
           type: 'number',
@@ -169,6 +210,11 @@ CORRECT: 1. handleRequest (parent) → 1.1 validateInput (child at call site) �
   {
     name: 'add_child_bookmark',
     description: `Add a child bookmark under an existing bookmark. Creates hierarchical structure.
+
+**NEW: Markdown links in descriptions!**
+- Link to files: [config](src/config.ts)
+- Link to specific lines: [handler](src/handler.ts:45)
+- Create cross-references between code locations
 
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
 - You MUST use Grep tool to search and confirm the EXACT line number before adding a bookmark
@@ -202,7 +248,14 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         location: {
           type: 'string',
-          description: 'Location in format "path/to/file:line" or "path/to/file:start-end" for ranges'
+          description: `Location in format "path/to/file:line" or "path/to/file:start-end" for ranges
+
+**PATH FORMAT - CRITICAL:**
+- **Relative path** (recommended): Use path relative to the project root (e.g., "src/game/crash.go:45")
+- **Absolute path**: Use absolute path if you are analyzing a different project (e.g., "/Users/name/project/src/main.go:100")
+- The extension will try relative path first, then fall back to absolute path if the file is not found
+- When using Serena MCP or analyzing files with absolute paths, use the absolute path in the location
+- When analyzing the current project, use relative paths for better portability`
         },
         title: {
           type: 'string',
@@ -210,7 +263,36 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
         },
         description: {
           type: 'string',
-          description: 'Detailed explanation of what this code does and why it matters.'
+          description: `Explanation of what this code does.
+
+**CROSS-REFERENCE TIP:**
+When describing related code, use Markdown links for easy navigation:
+- Same file: [other function](src/file.ts:100)
+- Different file: [config setup](src/config/init.ts:25)
+- Entry point: [see main flow](src/main.ts:15)
+
+**DESCRIPTION FORMAT:**
+- **First line**: Brief summary of what this line/block does (one sentence, plain text)
+- **Following lines** (optional): If more details needed, add blank line then use Markdown for rich formatting
+
+**Markdown features** (use ONLY after first line):
+- Use **bold**, *italic*, \`code\`, ~~strikethrough~~ for emphasis
+- **Use file links**: [text](path/to/file) or [text](path/to/file:123) for clickable navigation
+- Use numbered lists (1. 2. 3.) or bullet lists (- item)
+- Use code blocks with \`\`\`language\\n...\\n\`\`\` for multi-line code
+- Use > for blockquotes and important notes
+
+**Example description with cross-references:**
+\`\`\`
+验证用户下注是否合法, 包括余额、限额和游戏状态检查
+
+检查细节:
+1. **余额检查**: 用户钱包余额 >= 下注金额 (参见 [wallet.Balance](src/wallet/balance.go:78))
+2. **限额检查**: 下注金额在 \`minBet\` - \`maxBet\` 范围内 (配置见 [game config](src/config/game.toml:12-15))
+3. **状态检查**: 游戏当前状态为 \`BETTING_PHASE\` (状态机见 [state machine](src/game/state.go:45-120))
+
+> 注意: 验证失败会抛出 \`InvalidBetError\` 异常, 错误处理见 [error handler](src/errors/handler.go:33)
+\`\`\``
         },
         order: {
           type: 'number',
@@ -298,6 +380,11 @@ Parent bookmark: "handleRequest" at handler.go:50 (function definition or entry 
     name: 'update_bookmark',
     description: `Update a bookmark's properties. Supports moving bookmark in hierarchy via parentId.
 
+**NEW: Markdown links in descriptions!**
+- Link to files: [config](src/config.ts)
+- Link to specific lines: [handler](src/handler.ts:45)
+- Create cross-references between code locations
+
 **PREFER THIS OVER DELETE+RECREATE!**
 - To fix a title: update_bookmark({ bookmarkId, title: "new title" })
 - To fix description: update_bookmark({ bookmarkId, description: "new desc" })
@@ -328,7 +415,36 @@ Circular references are automatically prevented when moving in hierarchy.`,
         },
         description: {
           type: 'string',
-          description: 'New description'
+          description: `New description
+
+**CROSS-REFERENCE TIP:**
+When describing related code, use Markdown links for easy navigation:
+- Same file: [other function](src/file.ts:100)
+- Different file: [config setup](src/config/init.ts:25)
+- Entry point: [see main flow](src/main.ts:15)
+
+**DESCRIPTION FORMAT:**
+- **First line**: Brief summary of what this line/block does (one sentence, plain text)
+- **Following lines** (optional): If more details needed, add blank line then use Markdown for rich formatting
+
+**Markdown features** (use ONLY after first line):
+- Use **bold**, *italic*, \`code\`, ~~strikethrough~~ for emphasis
+- **Use file links**: [text](path/to/file) or [text](path/to/file:123) for clickable navigation
+- Use numbered lists (1. 2. 3.) or bullet lists (- item)
+- Use code blocks with \`\`\`language\\n...\\n\`\`\` for multi-line code
+- Use > for blockquotes and important notes
+
+**Example description with cross-references:**
+\`\`\`
+验证用户下注是否合法, 包括余额、限额和游戏状态检查
+
+检查细节:
+1. **余额检查**: 用户钱包余额 >= 下注金额 (参见 [wallet.Balance](src/wallet/balance.go:78))
+2. **限额检查**: 下注金额在 \`minBet\` - \`maxBet\` 范围内 (配置见 [game config](src/config/game.toml:12-15))
+3. **状态检查**: 游戏当前状态为 \`BETTING_PHASE\` (状态机见 [state machine](src/game/state.go:45-120))
+
+> 注意: 验证失败会抛出 \`InvalidBetError\` 异常, 错误处理见 [error handler](src/errors/handler.go:33)
+\`\`\``
         },
         order: {
           type: 'number',
@@ -419,6 +535,11 @@ For bulk removal, use batch_remove_bookmarks.`,
     name: 'batch_add_bookmarks',
     description: `Add multiple bookmarks to a group in a single operation. More efficient than adding one by one.
 
+**NEW: Markdown links in descriptions!**
+- Link to files: [config](src/config.ts)
+- Link to specific lines: [handler](src/handler.ts:45)
+- Create cross-references between code locations
+
 **CRITICAL - NEVER GUESS LINE NUMBERS!**
 - You MUST use Grep tool to search and confirm EXACT line numbers before adding bookmarks
 - NEVER estimate or guess line numbers - always search with Grep first
@@ -487,7 +608,36 @@ batch_add_bookmarks({
               },
               description: {
                 type: 'string',
-                description: 'Detailed explanation. DO NOT include title.'
+                description: `Explanation of what this code does. DO NOT include title.
+
+**CROSS-REFERENCE TIP:**
+When describing related code, use Markdown links for easy navigation:
+- Same file: [other function](src/file.ts:100)
+- Different file: [config setup](src/config/init.ts:25)
+- Entry point: [see main flow](src/main.ts:15)
+
+**DESCRIPTION FORMAT:**
+- **First line**: Brief summary of what this line/block does (one sentence, plain text)
+- **Following lines** (optional): If more details needed, add blank line then use Markdown for rich formatting
+
+**Markdown features** (use ONLY after first line):
+- Use **bold**, *italic*, \`code\`, ~~strikethrough~~ for emphasis
+- **Use file links**: [text](path/to/file) or [text](path/to/file:123) for clickable navigation
+- Use numbered lists (1. 2. 3.) or bullet lists (- item)
+- Use code blocks with \`\`\`language\\n...\\n\`\`\` for multi-line code
+- Use > for blockquotes and important notes
+
+**Example description with cross-references:**
+\`\`\`
+验证用户下注是否合法, 包括余额、限额和游戏状态检查
+
+检查细节:
+1. **余额检查**: 用户钱包余额 >= 下注金额 (参见 [wallet.Balance](src/wallet/balance.go:78))
+2. **限额检查**: 下注金额在 \`minBet\` - \`maxBet\` 范围内 (配置见 [game config](src/config/game.toml:12-15))
+3. **状态检查**: 游戏当前状态为 \`BETTING_PHASE\` (状态机见 [state machine](src/game/state.go:45-120))
+
+> 注意: 验证失败会抛出 \`InvalidBetError\` 异常, 错误处理见 [error handler](src/errors/handler.go:33)
+\`\`\``
               },
               order: {
                 type: 'number',
@@ -540,7 +690,7 @@ export class MCPServerStandalone {
     this.handlers = new MCPHandlersStandalone(workspaceManager);
     this.server = new Server(
       {
-        name: 'ai-bookmarks',
+        name: 'mcp-bookmarks',
         version: '0.1.0'
       },
       {
@@ -632,7 +782,7 @@ export class MCPServerStandalone {
   async start(): Promise<void> {
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    console.error('AI Bookmarks MCP server started');
+    console.error('MCP Bookmarks MCP server started');
   }
 
   async stop(): Promise<void> {

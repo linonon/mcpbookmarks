@@ -13,7 +13,7 @@ import {
 } from './types';
 import { nowISO, parseLocation, normalizePath, formatLocation, adjustLineNumbers } from '../utils';
 
-const STORE_FILE_NAME = 'ai-bookmarks.json';
+const STORE_FILE_NAME = 'mcp-bookmarks.json';
 const STORE_DIR = '.vscode';
 
 export class BookmarkStoreManager {
@@ -53,6 +53,13 @@ export class BookmarkStoreManager {
 
   private load(): BookmarkStore {
     try {
+      // 数据迁移: 如果旧的 ai-bookmarks.json 存在且新文件不存在, 自动重命名
+      const oldPath = path.join(this.workspaceRoot, STORE_DIR, 'ai-bookmarks.json');
+      if (fs.existsSync(oldPath) && !fs.existsSync(this.storePath)) {
+        fs.renameSync(oldPath, this.storePath);
+        console.log('Migrated ai-bookmarks.json to mcp-bookmarks.json');
+      }
+
       if (fs.existsSync(this.storePath)) {
         const content = fs.readFileSync(this.storePath, 'utf-8');
         return JSON.parse(content) as BookmarkStore;
@@ -531,7 +538,7 @@ export class BookmarkStoreManager {
   // Export to markdown
   exportToMarkdown(): string {
     const lines: string[] = [];
-    lines.push(`# ${this.store.projectName} - AI Bookmarks`);
+    lines.push(`# ${this.store.projectName} - MCP Bookmarks`);
     lines.push('');
 
     for (const group of this.store.groups) {

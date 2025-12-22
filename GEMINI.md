@@ -1,6 +1,6 @@
 # MCP Bookmarks - VSCode Extension
 
-# 这个文档应该与 ./GEMINI.md 中的说明保持同步更新, 应该保持一模一样的内容.
+# 这个文档应该与 ./CLAUDE.md 中的说明保持同步更新, 应该保持一模一样的内容.
 
 ## 項目概述
 

@@ -65,7 +65,7 @@ export class MCPHandlersStandalone {
         data: {
           workspace: path,
           message: `Workspace set to: ${path}`,
-          bookmarkFile: `${path}/.vscode/ai-bookmarks.json`
+          bookmarkFile: `${path}/.vscode/mcp-bookmarks.json`
         }
       };
     } catch (error) {
@@ -87,7 +87,7 @@ export class MCPHandlersStandalone {
         data: {
           currentWorkspace: defaultWorkspace,
           activeWorkspaces: activeWorkspaces,
-          bookmarkFile: `${defaultWorkspace}/.vscode/ai-bookmarks.json`
+          bookmarkFile: `${defaultWorkspace}/.vscode/mcp-bookmarks.json`
         }
       };
     } catch (error) {

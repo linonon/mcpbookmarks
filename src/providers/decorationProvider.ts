@@ -85,7 +85,7 @@ export class DecorationProvider implements vscode.Disposable {
 
   private updateDecorations(editor: vscode.TextEditor): void {
     // Check if decorations are enabled
-    const config = vscode.workspace.getConfiguration('aiBookmarks');
+    const config = vscode.workspace.getConfiguration('mcpBookmarks');
     if (!config.get<boolean>('showInlineDecorations', true)) {
       this.clearDecorations(editor);
       return;

@@ -1,6 +1,6 @@
-# AI Bookmarks MCP Server
+# MCP Bookmarks MCP Server
 
-本目录包含 AI Bookmarks 的 MCP Server 实现。
+本目录包含 MCP Bookmarks 的 MCP Server 实现。
 
 ## 双版本架构
 

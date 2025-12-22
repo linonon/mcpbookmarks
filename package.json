@@ -1,9 +1,15 @@
 {
-  "name": "ai-bookmarks",
-  "displayName": "AI Bookmarks",
+  "name": "mcp-bookmarks",
+  "displayName": "MCP Bookmarks",
+  "icon": "icons/icon.png",
   "description": "AI-powered code bookmarks with MCP integration",
   "version": "0.1.0",
   "publisher": "linonon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/linonon/mcp-bookmarks.git"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -18,330 +24,487 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "aiBookmarksContainer",
-          "title": "AI Bookmarks",
+          "id": "mcpBookmarksContainer",
+          "title": "MCP Bookmarks",
           "icon": "icons/bookmark.svg"
         }
       ]
     },
     "views": {
-      "aiBookmarksContainer": [
+      "mcpBookmarksContainer": [
         {
-          "id": "aiBookmarks",
-          "name": "Bookmarks"
+          "id": "mcpBookmarks",
+          "name": "Bookmarks",
+          "type": "webview",
+          "retainContextWhenHidden": true
         }
       ]
     },
     "commands": [
       {
-        "command": "aiBookmarks.refresh",
+        "command": "mcpBookmarks.refresh",
         "title": "Refresh Bookmarks",
         "icon": "$(refresh)"
       },
       {
-        "command": "aiBookmarks.jumpTo",
+        "command": "mcpBookmarks.jumpTo",
         "title": "Jump to Bookmark"
       },
       {
-        "command": "aiBookmarks.delete",
+        "command": "mcpBookmarks.delete",
         "title": "Delete Bookmark",
         "icon": "$(trash)"
       },
       {
-        "command": "aiBookmarks.deleteGroup",
+        "command": "mcpBookmarks.deleteGroup",
         "title": "Delete Group",
         "icon": "$(trash)"
       },
       {
-        "command": "aiBookmarks.addManual",
+        "command": "mcpBookmarks.addManual",
         "title": "Add Bookmark Here"
       },
       {
-        "command": "aiBookmarks.createGroup",
-        "title": "Create Bookmark Group"
+        "command": "mcpBookmarks.createGroup",
+        "title": "New Group",
+        "icon": "$(add)"
       },
       {
-        "command": "aiBookmarks.exportMarkdown",
+        "command": "mcpBookmarks.exportMarkdown",
         "title": "Export Bookmarks as Markdown"
       },
       {
-        "command": "aiBookmarks.search",
+        "command": "mcpBookmarks.search",
         "title": "Search Bookmarks",
         "icon": "$(search)"
       },
       {
-        "command": "aiBookmarks.checkValidity",
+        "command": "mcpBookmarks.checkValidity",
         "title": "Check Bookmark Validity",
         "icon": "$(check-all)"
       },
       {
-        "command": "aiBookmarks.editBookmark",
+        "command": "mcpBookmarks.editBookmark",
         "title": "Edit Bookmark",
         "icon": "$(edit)"
       },
       {
-        "command": "aiBookmarks.nextBookmark",
+        "command": "mcpBookmarks.nextBookmark",
         "title": "Go to Next Bookmark",
         "icon": "$(arrow-down)"
       },
       {
-        "command": "aiBookmarks.prevBookmark",
+        "command": "mcpBookmarks.prevBookmark",
         "title": "Go to Previous Bookmark",
         "icon": "$(arrow-up)"
       },
       {
-        "command": "aiBookmarks.toggleViewMode",
-        "title": "Toggle View Mode (Group/File)",
-        "icon": "$(list-tree)"
+        "command": "mcpBookmarks.toggleViewMode",
+        "title": "Toggle View Style (Nested/Tree)",
+        "icon": "$(layout)"
       },
       {
-        "command": "aiBookmarks.moveBookmarkUp",
+        "command": "mcpBookmarks.switchViewStyle",
+        "title": "Switch View Style (Nested/Tree)",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "mcpBookmarks.moveBookmarkUp",
         "title": "Move Bookmark Up",
         "icon": "$(arrow-up)"
       },
       {
-        "command": "aiBookmarks.moveBookmarkDown",
+        "command": "mcpBookmarks.moveBookmarkDown",
         "title": "Move Bookmark Down",
         "icon": "$(arrow-down)"
       },
       {
-        "command": "aiBookmarks.expandAll",
+        "command": "mcpBookmarks.expandAll",
         "title": "Expand All",
         "icon": "$(expand-all)"
       },
       {
-        "command": "aiBookmarks.collapseAll",
+        "command": "mcpBookmarks.collapseAll",
         "title": "Collapse All",
         "icon": "$(collapse-all)"
       },
       {
-        "command": "aiBookmarks.editGroup",
+        "command": "mcpBookmarks.editGroup",
         "title": "Edit Group",
         "icon": "$(edit)"
       },
       {
-        "command": "aiBookmarks.renameGroup",
+        "command": "mcpBookmarks.renameGroup",
         "title": "Rename Group",
         "icon": "$(rename)"
       },
       {
-        "command": "aiBookmarks.moveBookmark",
+        "command": "mcpBookmarks.moveBookmark",
         "title": "Move to Group...",
         "icon": "$(move)"
       },
       {
-        "command": "aiBookmarks.addChildBookmark",
+        "command": "mcpBookmarks.addChildBookmark",
         "title": "Add Child Bookmark",
         "icon": "$(add)"
       },
       {
-        "command": "aiBookmarks.copyBookmarkInfo",
+        "command": "mcpBookmarks.copyBookmarkInfo",
         "title": "Copy Bookmark Info",
         "icon": "$(copy)"
       },
       {
-        "command": "aiBookmarks.copyGroupInfo",
+        "command": "mcpBookmarks.copyGroupInfo",
         "title": "Copy Group Info",
         "icon": "$(copy)"
+      },
+      {
+        "command": "mcpBookmarks.copyRelativePath",
+        "title": "Copy Relative Path",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "mcpBookmarks.copyAbsolutePath",
+        "title": "Copy Absolute Path",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "mcpBookmarks.openBookmarkDetail",
+        "title": "Open Bookmark Detail",
+        "icon": "$(info)"
+      },
+      {
+        "command": "mcpBookmarks.collapseGroup",
+        "title": "Collapse Group",
+        "icon": "$(chevron-down)"
+      },
+      {
+        "command": "mcpBookmarks.expandGroup",
+        "title": "Expand Group",
+        "icon": "$(chevron-up)"
+      },
+      {
+        "command": "mcpBookmarks.copyMCPCommand",
+        "title": "Copy MCP Setup Command",
+        "icon": "$(terminal)",
+        "category": "MCP Bookmarks"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "aiBookmarks.refresh",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.search",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@1"
         },
         {
-          "command": "aiBookmarks.search",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.expandAll",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@2"
         },
         {
-          "command": "aiBookmarks.createGroup",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.collapseAll",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@3"
         },
         {
-          "command": "aiBookmarks.toggleViewMode",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.createGroup",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@4"
         },
         {
-          "command": "aiBookmarks.exportMarkdown",
-          "when": "view == aiBookmarks"
+          "command": "mcpBookmarks.refresh",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@5"
         },
         {
-          "command": "aiBookmarks.expandAll",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.toggleViewMode",
+          "when": "view == mcpBookmarks",
+          "group": "navigation@6"
         },
         {
-          "command": "aiBookmarks.collapseAll",
-          "when": "view == aiBookmarks",
-          "group": "navigation"
+          "command": "mcpBookmarks.exportMarkdown",
+          "when": "view == mcpBookmarks"
         }
       ],
       "view/item/context": [
         {
-          "command": "aiBookmarks.editBookmark",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/",
+          "command": "mcpBookmarks.editBookmark",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/",
           "group": "inline"
         },
         {
-          "command": "aiBookmarks.addChildBookmark",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/",
+          "command": "mcpBookmarks.openBookmarkDetail",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/",
+          "group": "inline"
+        },
+        {
+          "command": "mcpBookmarks.addChildBookmark",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/",
           "group": "1_modification"
         },
         {
-          "command": "aiBookmarks.checkValidity",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.checkValidity",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.delete",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.delete",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.moveBookmarkUp",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.moveBookmarkUp",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.moveBookmarkDown",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.moveBookmarkDown",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.moveBookmark",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.moveBookmark",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.copyBookmarkInfo",
-          "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+          "command": "mcpBookmarks.copyBookmarkInfo",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
         },
         {
-          "command": "aiBookmarks.renameGroup",
-          "when": "view == aiBookmarks && viewItem == group",
+          "command": "mcpBookmarks.copyRelativePath",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
+        },
+        {
+          "command": "mcpBookmarks.copyAbsolutePath",
+          "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
+        },
+        {
+          "command": "mcpBookmarks.renameGroup",
+          "when": "view == mcpBookmarks && viewItem == group",
           "group": "inline"
         },
         {
-          "command": "aiBookmarks.editGroup",
-          "when": "view == aiBookmarks && viewItem == group"
+          "command": "mcpBookmarks.collapseGroup",
+          "when": "view == mcpBookmarks && viewItem == group",
+          "group": "inline"
         },
         {
-          "command": "aiBookmarks.copyGroupInfo",
-          "when": "view == aiBookmarks && viewItem == group"
+          "command": "mcpBookmarks.expandGroup",
+          "when": "view == mcpBookmarks && viewItem == group",
+          "group": "inline"
         },
         {
-          "command": "aiBookmarks.deleteGroup",
-          "when": "view == aiBookmarks && viewItem == group"
+          "command": "mcpBookmarks.editGroup",
+          "when": "view == mcpBookmarks && viewItem == group"
+        },
+        {
+          "command": "mcpBookmarks.copyGroupInfo",
+          "when": "view == mcpBookmarks && viewItem == group"
+        },
+        {
+          "command": "mcpBookmarks.deleteGroup",
+          "when": "view == mcpBookmarks && viewItem == group"
         }
       ],
       "editor/context": [
         {
-          "command": "aiBookmarks.addManual",
+          "command": "mcpBookmarks.addManual",
           "group": "navigation"
         }
       ]
     },
     "keybindings": [
       {
-        "command": "aiBookmarks.addManual",
+        "command": "mcpBookmarks.addManual",
         "key": "ctrl+alt+b",
         "mac": "cmd+alt+b",
         "when": "editorTextFocus"
       },
       {
-        "command": "aiBookmarks.search",
+        "command": "mcpBookmarks.search",
         "key": "ctrl+shift+b",
         "mac": "cmd+shift+b"
       },
       {
-        "command": "aiBookmarks.nextBookmark",
+        "command": "mcpBookmarks.nextBookmark",
         "key": "ctrl+alt+down",
         "mac": "cmd+alt+down",
         "when": "editorTextFocus"
       },
       {
-        "command": "aiBookmarks.prevBookmark",
+        "command": "mcpBookmarks.prevBookmark",
         "key": "ctrl+alt+up",
         "mac": "cmd+alt+up",
         "when": "editorTextFocus"
       },
       {
-        "command": "aiBookmarks.renameGroup",
+        "command": "mcpBookmarks.renameGroup",
         "key": "f2",
-        "when": "view == aiBookmarks && viewItem == group"
+        "when": "view == mcpBookmarks && viewItem == group"
       },
       {
-        "command": "aiBookmarks.delete",
+        "command": "mcpBookmarks.delete",
         "key": "delete",
         "mac": "cmd+backspace",
-        "when": "view == aiBookmarks && viewItem =~ /^bookmark/"
+        "when": "view == mcpBookmarks && viewItem =~ /^bookmark/"
       }
     ],
     "configuration": {
-      "title": "AI Bookmarks",
+      "title": "MCP Bookmarks",
       "properties": {
-        "aiBookmarks.mcpPort": {
+        "mcpBookmarks.mcpPort": {
           "type": "number",
           "default": 3333,
           "description": "MCP Server port"
         },
-        "aiBookmarks.showInlineDecorations": {
+        "mcpBookmarks.showInlineDecorations": {
           "type": "boolean",
           "default": true,
           "description": "Show bookmark icons in editor gutter"
         },
-        "aiBookmarks.viewMode": {
+        "mcpBookmarks.viewMode": {
           "type": "string",
-          "enum": ["group", "file"],
+          "enum": [
+            "group",
+            "file"
+          ],
           "default": "group",
           "description": "View mode for bookmarks: 'group' (by bookmark group) or 'file' (by file path)"
         },
-        "aiBookmarks.quickAddMode": {
+        "mcpBookmarks.viewStyle": {
           "type": "string",
-          "enum": ["full", "simple"],
+          "enum": [
+            "nested",
+            "tree"
+          ],
+          "default": "tree",
+          "description": "UI style for bookmarks: 'nested' (hierarchical) or 'tree' (flat list with tree structure)"
+        },
+        "mcpBookmarks.quickAddMode": {
+          "type": "string",
+          "enum": [
+            "full",
+            "simple"
+          ],
           "default": "simple",
           "description": "Quick add bookmark mode: 'full' (complete flow with all options) or 'simple' (only title required)"
         },
-        "aiBookmarks.defaultCategory": {
+        "mcpBookmarks.defaultCategory": {
           "type": "string",
-          "enum": ["entry-point", "core-logic", "todo", "bug", "optimization", "explanation", "warning", "reference"],
-          "default": "explanation",
+          "enum": [
+            "entry-point",
+            "core-logic",
+            "issue",
+            "note"
+          ],
+          "default": "note",
           "description": "Default category for new bookmarks"
         },
-        "aiBookmarks.confirmBeforeDelete": {
+        "mcpBookmarks.confirmBeforeDelete": {
           "type": "boolean",
           "default": true,
           "description": "Show confirmation dialog before deleting bookmarks or groups"
         },
-        "aiBookmarks.showInlineDescription": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show bookmark description preview in tree view"
-        },
-        "aiBookmarks.inlineDescriptionLength": {
+        "mcpBookmarks.fontSize.title": {
           "type": "number",
-          "default": 50,
+          "default": 13,
+          "minimum": 8,
+          "maximum": 32,
+          "description": "书签标题的字体大小 (px)"
+        },
+        "mcpBookmarks.fontSize.description": {
+          "type": "number",
+          "default": 11,
+          "minimum": 8,
+          "maximum": 28,
+          "description": "书签描述的字体大小 (px)"
+        },
+        "mcpBookmarks.fontSize.groupName": {
+          "type": "number",
+          "default": 14,
           "minimum": 10,
-          "maximum": 200,
-          "description": "Maximum characters to show in description preview"
+          "maximum": 32,
+          "description": "分组名称的字体大小 (px)"
+        },
+        "mcpBookmarks.fontSize.location": {
+          "type": "number",
+          "default": 10,
+          "minimum": 8,
+          "maximum": 20,
+          "description": "文件位置信息的字体大小 (px)"
+        },
+        "mcpBookmarks.fontSize.scale": {
+          "type": "number",
+          "default": 1.0,
+          "minimum": 0.5,
+          "maximum": 2.5,
+          "markdownDescription": "全局字体缩放倍数。设置后会覆盖上面的独立配置。\n\n**建议**：一般情况下调整独立配置即可，此选项用于快速整体缩放。"
+        },
+        "mcpBookmarks.hierarchyColors.depth0": {
+          "type": "string",
+          "default": "#3b82f6",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 0 color (Standard: Blue)"
+        },
+        "mcpBookmarks.hierarchyColors.depth1": {
+          "type": "string",
+          "default": "#8b5cf6",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 1 color (Standard: Purple)"
+        },
+        "mcpBookmarks.hierarchyColors.depth2": {
+          "type": "string",
+          "default": "#06b6d4",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 2 color (Standard: Cyan)"
+        },
+        "mcpBookmarks.hierarchyColors.depth3": {
+          "type": "string",
+          "default": "#22c55e",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 3 color (Standard: Green)"
+        },
+        "mcpBookmarks.hierarchyColors.depth4": {
+          "type": "string",
+          "default": "#eab308",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 4 color (Standard: Yellow)"
+        },
+        "mcpBookmarks.hierarchyColors.depth5": {
+          "type": "string",
+          "default": "#fb923c",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 5 color (Standard: Orange)"
+        },
+        "mcpBookmarks.hierarchyColors.depth6": {
+          "type": "string",
+          "default": "#ef4444",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 6 color (Standard: Red)"
+        },
+        "mcpBookmarks.hierarchyColors.depth7": {
+          "type": "string",
+          "default": "#ec4899",
+          "format": "color-hex",
+          "description": "Hierarchy Depth 7 color (Standard: Pink)"
         }
       }
     }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "npm run compile:extension && npm run compile:mcp",
+    "compile": "npm run compile:extension && npm run compile:mcp && npm run copy:launcher && npm run copy:webview",
     "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "compile:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node",
-    "watch": "npm run watch:extension & npm run watch:mcp",
+    "copy:launcher": "cp src/launcher.js dist/launcher.js",
+    "copy:webview": "mkdir -p dist/webview && cp -r src/webview/* dist/webview/",
+    "watch": "npm run watch:extension & npm run watch:mcp & npm run watch:launcher",
     "watch:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
     "watch:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node --watch",
+    "watch:launcher": "nodemon --watch src/launcher.js --exec 'npm run copy:launcher'",
     "lint": "eslint src --ext ts",
     "package": "vsce package"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
+    "@vscode/codicons": "^0.0.44",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

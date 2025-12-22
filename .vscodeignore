@@ -1,5 +1,7 @@
 .vscode/**
 .vscode-test/**
+.claude/**
+.serena/**
 src/**
 node_modules/**
 .gitignore

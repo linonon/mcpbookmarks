@@ -1,0 +1,104 @@
+/* ==================== Tree 模式特定样式 (Grid 布局改进) ==================== */
+
+/* Bookmark Header - Grid 布局 */
+.view-mode-tree .bookmark-header {
+  display: grid;
+  grid-template-columns:
+    [indent] calc(var(--indent-level, 0) * 12px)
+    [chevron] 16px
+    [badge] auto
+    [content] 1fr;
+  gap: 0;
+  align-items: center;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.bookmark-header:hover {
+  background-color: var(--vscode-list-hoverBackground);
+}
+
+/* 标题和位置的包装容器 */
+.bookmark-title-location {
+  grid-column: content;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.bookmark-title {
+  flex: 0 1 auto;
+  font-size: var(--font-size-title);
+  font-weight: 500;
+  color: var(--vscode-foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bookmark-location {
+  flex-shrink: 0;
+  margin-left: auto;
+  font-size: var(--font-size-location);
+  color: var(--vscode-foreground);  /* 改用主前景色 */
+  opacity: 0.9;  /* 提高 opacity 从 0.8 到 0.9 */
+  font-family: var(--vscode-editor-font-family);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tree 模式下的 location (更低的 opacity, 单色字体) */
+.view-mode-tree .bookmark-location {
+  font-size: var(--font-size-location) !important;
+  opacity: 0.75;  /* 从 0.5 提高到 0.75 */
+  margin-left: auto;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+/* Description 可见性改进 */
+.bookmark-description {
+  flex: 1;
+  order: 1;
+  font-size: var(--font-size-description);
+  color: var(--vscode-foreground);  /* 使用主前景色 */
+  opacity: 0.85;  /* 从 0.7 提升到 0.85 */
+  line-height: 1.5;
+
+  /* 默认 1 行 */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  position: relative;
+}
+
+.bookmark-description.expanded {
+  -webkit-line-clamp: unset;
+  display: block;
+}
+
+/* 展开/折叠按钮增强 */
+.bookmark-toggle-btn {
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: var(--vscode-foreground);
+  opacity: 0.7;  /* 从 0.5 提高到 0.7 */
+  cursor: pointer;
+  border-radius: 3px;
+  transition: opacity 0.2s, transform 0.2s, background-color 0.2s;
+}
+
+.bookmark-toggle-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);  /* 添加缩放效果 */
+  background-color: var(--vscode-toolbar-hoverBackground);
+}

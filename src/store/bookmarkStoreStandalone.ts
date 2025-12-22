@@ -13,7 +13,7 @@ import {
 } from './types';
 import { nowISO, parseLocation, normalizePath } from '../utils';
 
-const STORE_FILE_NAME = 'ai-bookmarks.json';
+const STORE_FILE_NAME = 'mcp-bookmarks.json';
 const STORE_DIR = '.vscode';
 
 /**
@@ -508,7 +508,7 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
   // Export to markdown
   exportToMarkdown(): string {
     const lines: string[] = [];
-    lines.push(`# ${this.store.projectName} - AI Bookmarks`);
+    lines.push(`# ${this.store.projectName} - MCP Bookmarks`);
     lines.push('');
 
     for (const group of this.store.groups) {

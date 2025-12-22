@@ -1210,6 +1210,10 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
         <span class="codicon codicon-edit"></span>
         <span>Edit Group</span>
       </div>
+      <div class="context-menu-item" data-action="copyGroupInfo">
+        <span class="codicon codicon-copy"></span>
+        <span>Copy Info</span>
+      </div>
       <div class="context-menu-separator"></div>
       <div class="context-menu-item danger" data-action="deleteGroup">
         <span class="codicon codicon-trash"></span>
@@ -1330,6 +1334,20 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
         });
         return;
       }
+    }
+  }
+
+  // 复制分组信息到剪贴板
+  /** @param {string} groupId */
+  function copyGroupInfo(groupId) {
+    const group = currentData.groups.find(g => g.id === groupId);
+    if (group) {
+      const info = `${group.name}(${group.id})`;
+      navigator.clipboard.writeText(info).then(() => {
+        vscode.postMessage({ type: 'showInfo', message: 'Group ID copied to clipboard' });
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+      });
     }
   }
 
@@ -1638,6 +1656,9 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
         break;
       case 'editGroup':
         vscode.postMessage({ type: 'editGroup', groupId: contextMenuTarget.id });
+        break;
+      case 'copyGroupInfo':
+        copyGroupInfo(contextMenuTarget.id);
         break;
       case 'deleteGroup':
         vscode.postMessage({ type: 'deleteGroup', groupId: contextMenuTarget.id });

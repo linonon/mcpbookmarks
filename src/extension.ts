@@ -910,7 +910,8 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         return;
       }
 
-      const infoText = `[Bookmark Group] ${groupItem.group.name}`;
+      const group = groupItem.group;
+      const infoText = `${group.name}(${group.id})`;
       await vscode.env.clipboard.writeText(infoText);
       vscode.window.showInformationMessage('Group info copied');
     })

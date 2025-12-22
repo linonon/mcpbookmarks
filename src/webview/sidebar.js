@@ -217,6 +217,17 @@
         // 重新加载模式特定的 CSS
         loadModeSpecificCSS(uiState.viewMode);
 
+        // 重新加载模式特定的 JS (异步)
+        loadModeSpecificJS(uiState.viewMode).then(() => {
+          console.log(`[Toggle View Mode] Successfully loaded ${uiState.viewMode} mode JS`);
+          // JS 加载完成后,如果有数据就重新渲染
+          if (currentData.groups) {
+            renderGroups(currentData.groups);
+          }
+        }).catch(error => {
+          console.error('[Toggle View Mode] Failed to load mode-specific JS:', error);
+        });
+
         // 更新容器 class
         if (bookmarksContainer) {
           if (uiState.viewMode === 'tree') {
@@ -361,15 +372,40 @@
     if (uiState.viewMode === 'tree') {
       // Tree 模式: 使用 Grid 布局
       // @ts-ignore - Function loaded dynamically from sidebar-tree.js
-      headerHtml = typeof renderBookmarkHeaderTree === 'function'
-        ? renderBookmarkHeaderTree(bookmark, hasChildren, isCollapsed, depth)
-        : `<div class="bookmark-header">Loading...</div>`;
+      if (typeof window.renderBookmarkHeaderTree !== 'function') {
+        console.warn('[Render Warning] renderBookmarkHeaderTree not loaded yet, using fallback');
+        // 回退到基础渲染 (显示标题而不是 Loading...)
+        headerHtml = `
+          <div class="bookmark-header" style="--indent-level: ${depth}">
+            <div class="bookmark-indent"></div>
+            <span class="bookmark-chevron">${hasChildren ? `<span class="icon icon-expand"></span>` : ''}</span>
+            ${bookmark.order ? `<span class="order-badge">${bookmark.order}</span>` : ''}
+            <div class="bookmark-title-location">
+              <span class="bookmark-title">${escapeHtml(bookmark.title)}</span>
+              <span class="bookmark-location">${escapeHtml(formatLocation(bookmark.location))}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        headerHtml = window.renderBookmarkHeaderTree(bookmark, hasChildren, isCollapsed, depth);
+      }
     } else {
       // Nested 模式: 使用 Flexbox 布局
       // @ts-ignore - Function loaded dynamically from sidebar-nested.js
-      headerHtml = typeof renderBookmarkHeaderNested === 'function'
-        ? renderBookmarkHeaderNested(bookmark, hasChildren, isCollapsed)
-        : `<div class="bookmark-header">Loading...</div>`;
+      if (typeof window.renderBookmarkHeaderNested !== 'function') {
+        console.warn('[Render Warning] renderBookmarkHeaderNested not loaded yet, using fallback');
+        // 回退到基础渲染
+        headerHtml = `
+          <div class="bookmark-header">
+            <span class="bookmark-chevron">${hasChildren ? `<span class="icon icon-expand"></span>` : ''}</span>
+            ${bookmark.order ? `<span class="order-badge">${bookmark.order}</span>` : ''}
+            <span class="bookmark-title">${escapeHtml(bookmark.title)}</span>
+            <span class="bookmark-location">${escapeHtml(formatLocation(bookmark.location))}</span>
+          </div>
+        `;
+      } else {
+        headerHtml = window.renderBookmarkHeaderNested(bookmark, hasChildren, isCollapsed);
+      }
     }
 
     return `

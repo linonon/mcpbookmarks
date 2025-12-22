@@ -19,6 +19,11 @@ let statusBarItem: vscode.StatusBarItem | undefined;
 export function activate(context: vscode.ExtensionContext): void {
   console.log('MCP Bookmarks extension is activating...');
 
+  // Install/update launcher script to fixed location
+  installLauncher(context).catch((err: any) => {
+    console.error('Failed to install launcher:', err);
+  });
+
   // Get workspace root
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
@@ -1114,32 +1119,26 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         return;
       }
 
+      // Get launcher path
+      const os = await import('os');
+      const launcherPath = path.join(os.homedir(), '.vscode', 'mcp-bookmarks-launcher.js');
+
       // Generate commands for different tools
       const commands = [
         {
-          label: 'Claude Code (npx - Recommended)',
-          description: 'Auto-updates, no path management needed',
-          command: `claude mcp add -s local -- npx -y @linonon/mcp-bookmarks-server`
+          label: 'Claude Code',
+          description: 'Auto-updates with extension, no npm required',
+          command: `claude mcp add -s local mcp-bookmarks -- node "${launcherPath}"`
         },
         {
-          label: 'Gemini (npx - Recommended)',
-          description: 'Auto-updates, no path management needed',
-          command: `gemini mcp add -s local -- npx -y @linonon/mcp-bookmarks-server`
+          label: 'Gemini',
+          description: 'Auto-updates with extension, no npm required',
+          command: `gemini mcp add -s local mcp-bookmarks -- node "${launcherPath}"`
         },
         {
-          label: 'Claude Code (Direct)',
-          description: 'Use extension path (requires manual update after extension upgrade)',
-          command: `claude mcp add -s local -- node "${serverPath}"`
-        },
-        {
-          label: 'Gemini (Direct)',
-          description: 'Use extension path (requires manual update after extension upgrade)',
-          command: `gemini mcp add -s local -- node "${serverPath}"`
-        },
-        {
-          label: 'VSCode (Copy Path)',
-          description: 'Copy server path for manual configuration',
-          command: serverPath
+          label: 'VSCode (Manual Configuration)',
+          description: 'Copy launcher path for VSCode MCP configuration',
+          command: launcherPath
         }
       ];
 
@@ -1153,17 +1152,22 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
 
       await vscode.env.clipboard.writeText(selected.command);
 
-      if (selected.label === 'VSCode (Copy Path)') {
+      if (selected.label === 'VSCode (Manual Configuration)') {
         vscode.window.showInformationMessage(
-          `Server path copied! Now:\n` +
+          `Launcher path copied!\n\n` +
+          `To configure in VSCode:\n` +
           `1. Press Cmd+P (Mac) or Ctrl+P (Windows)\n` +
-          `2. Type "MCP: Open User Configuration"\n` +
-          `3. Add configuration:\n` +
-          `   "mcp-bookmark": {\n` +
-          `     "type": "stdio",\n` +
-          `     "command": "node",\n` +
-          `     "args": ["${serverPath}"]\n` +
-          `   }`,
+          `2. Type ">MCP: Open User Configuration"\n` +
+          `3. Add this configuration:\n\n` +
+          `{\n` +
+          `  "servers": {\n` +
+          `    "mcp-bookmarks": {\n` +
+          `      "type": "stdio",\n` +
+          `      "command": "node",\n` +
+          `      "args": ["${launcherPath}"]\n` +
+          `    }\n` +
+          `  }\n` +
+          `}`,
           'Got it'
         );
       } else {
@@ -1319,6 +1323,64 @@ async function navigateBookmark(direction: 'next' | 'prev', workspaceRoot: strin
 
   if (targetIdx >= 0 && targetIdx < sortedBookmarks.length) {
     await vscode.commands.executeCommand('mcpBookmarks.jumpTo', sortedBookmarks[targetIdx].bookmark);
+  }
+}
+
+/**
+ * Install or update the launcher script to a fixed location
+ * This allows users to configure MCP once with a fixed path that works across extension updates
+ */
+async function installLauncher(context: vscode.ExtensionContext): Promise<void> {
+  const fs = await import('fs');
+  const path = await import('path');
+  const os = await import('os');
+  const crypto = await import('crypto');
+
+  const launcherSrc = path.join(context.extensionPath, 'dist', 'launcher.js');
+  const launcherDst = path.join(os.homedir(), '.vscode', 'mcp-bookmarks-launcher.js');
+
+  try {
+    // 确保目标目录存在
+    await fs.promises.mkdir(path.dirname(launcherDst), { recursive: true });
+
+    // 检查是否需要更新 (通过文件哈希比较)
+    const getHash = async (file: string): Promise<string> => {
+      const content = await fs.promises.readFile(file);
+      return crypto.createHash('md5').update(content).digest('hex');
+    };
+
+    // 获取源文件和目标文件的哈希
+    const srcHash = await getHash(launcherSrc);
+    const dstHash = await getHash(launcherDst).catch(() => null);
+
+    // 只在哈希不同时才复制 (避免每次激活都复制)
+    if (srcHash !== dstHash) {
+      await fs.promises.copyFile(launcherSrc, launcherDst);
+
+      // Unix 系统: 添加可执行权限
+      if (process.platform !== 'win32') {
+        await fs.promises.chmod(launcherDst, 0o755);
+      }
+
+      console.log(`MCP Bookmarks launcher installed/updated at: ${launcherDst}`);
+
+      // 首次安装时显示提示
+      if (!dstHash) {
+        vscode.window.showInformationMessage(
+          'MCP Bookmarks launcher installed! Use "Copy MCP Setup Command" to configure.',
+          'Copy Command'
+        ).then(selection => {
+          if (selection === 'Copy Command') {
+            vscode.commands.executeCommand('mcpBookmarks.copyMCPCommand');
+          }
+        });
+      }
+    }
+  } catch (error: any) {
+    console.error('Failed to install launcher:', error);
+    vscode.window.showErrorMessage(
+      `Failed to install MCP Bookmarks launcher: ${error.message}`
+    );
   }
 }
 

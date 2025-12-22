@@ -490,13 +490,15 @@
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
-    "compile": "npm run compile:extension && npm run compile:mcp && npm run copy:webview",
+    "compile": "npm run compile:extension && npm run compile:mcp && npm run copy:launcher && npm run copy:webview",
     "compile:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node",
     "compile:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node",
+    "copy:launcher": "cp src/launcher.js dist/launcher.js",
     "copy:webview": "mkdir -p dist/webview && cp -r src/webview/* dist/webview/",
-    "watch": "npm run watch:extension & npm run watch:mcp",
+    "watch": "npm run watch:extension & npm run watch:mcp & npm run watch:launcher",
     "watch:extension": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --watch",
     "watch:mcp": "esbuild ./src/mcp-server-main.ts --bundle --outfile=dist/mcp-server.js --format=cjs --platform=node --watch",
+    "watch:launcher": "nodemon --watch src/launcher.js --exec 'npm run copy:launcher'",
     "lint": "eslint src --ext ts",
     "package": "vsce package"
   },

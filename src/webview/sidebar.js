@@ -1,4 +1,10 @@
+/// <reference lib="dom" />
 // @ts-check
+
+// @ts-ignore
+const marked = /** @type {any} */ (window).marked;
+// @ts-ignore
+const DOMPurify = /** @type {any} */ (window).DOMPurify;
 
 /**
  * AI Bookmarks Sidebar Webview Script
@@ -9,7 +15,7 @@
   console.log('🚀🚀🚀 [SIDEBAR.JS] FILE LOADED - NEW VERSION! 🚀🚀🚀');
 
   // @ts-ignore
-  const vscode = acquireVsCodeApi();
+  const vscode = (/** @type {any} */ (window)).acquireVsCodeApi();
 
   // DOM Elements
   const bookmarksContainer = document.getElementById('bookmarks-container');
@@ -20,14 +26,40 @@
   const searchResults = document.getElementById('search-results');
   const contextMenu = document.getElementById('context-menu');
 
+  if (!bookmarksContainer || !loadingState || !emptyState || !noResultsState || !groupsList || !searchResults || !contextMenu) {
+    console.error('Required DOM elements not found');
+    return;
+  }
+
   // Header buttons
   // (view-style button removed, now controlled by VSCode toolbar)
 
   // State
+  /** 
+   * @type {{
+   *   groups: Array<{
+   *     id: string;
+   *     name: string;
+   *     bookmarks: Array<any>;
+   *     createdBy: string;
+   *     query?: string;
+   *     description?: string;
+   *   }>;
+   *   viewMode: string;
+   * }} 
+   */
   let currentData = { groups: [], viewMode: 'group' };
+  
+  /** @type {{ viewMode: 'nested' | 'tree' }} */
   let uiState = { viewMode: 'nested' }; // nested | tree
+  
+  /** @type {Set<string>} */
   let collapsedGroups = new Set();
+  
+  /** @type {Set<string>} */
   let collapsedBookmarks = new Set();
+  
+  /** @type {{ type: 'group' | 'bookmark', id: string, groupId?: string } | null} */
   let contextMenuTarget = null;
   /** @type {{mode: string, targetBookmarkId: string, groupId: string, parentId: string|null}|null} */
   let addBookmarkContext = null;
@@ -45,8 +77,8 @@
     }
 
     // 获取主 CSS 的基础 URL (从现有的 link 标签中提取)
-    const mainCssLink = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
-      .find(link => link.href.includes('sidebar.css'));
+    const mainCssLink = /** @type {HTMLLinkElement | undefined} */ (Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+      .find(link => /** @type {HTMLLinkElement} */ (link).href.includes('sidebar.css')));
     
     let baseUrl = '';
     if (mainCssLink) {
@@ -80,8 +112,8 @@
       }
 
       // 获取主 JS 的基础 URL (从现有的 script 标签中提取)
-      const mainJsScript = Array.from(document.querySelectorAll('script'))
-        .find(script => script.src.includes('sidebar.js'));
+      const mainJsScript = /** @type {HTMLScriptElement | undefined} */ (Array.from(document.querySelectorAll('script'))
+        .find(script => /** @type {HTMLScriptElement} */ (script).src.includes('sidebar.js')));
       
       let baseUrl = '';
       if (mainJsScript) {
@@ -146,9 +178,11 @@
     });
 
     // 阻止 context menu 内部点击传播
-    contextMenu.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
+    if (contextMenu) {
+      contextMenu.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
 
     // 键盘事件
     document.addEventListener('keydown', handleKeyDown);
@@ -199,7 +233,7 @@
           showError(message.field, message.error);
         }
         // 重新启用按钮
-        const saveBtn = document.querySelector('.form-btn-save');
+        const saveBtn = /** @type {HTMLButtonElement|null} */ (document.querySelector('.form-btn-save'));
         if (saveBtn) {
           saveBtn.disabled = false;
           saveBtn.textContent = 'Save';
@@ -246,13 +280,17 @@
   });
 
   // 处理刷新数据
+  /** @param {any} data */
   function handleRefresh(data) {
     currentData = data;
     renderGroups(data.groups);
   }
 
   // 渲染分组列表
+  /** @param {any[]} groups */
   function renderGroups(groups) {
+    if (!loadingState || !emptyState || !noResultsState || !searchResults || !groupsList) return;
+
     // 隐藏其他状态
     loadingState.style.display = 'none';
     emptyState.style.display = 'none';
@@ -274,6 +312,7 @@
   }
 
   // 渲染单个分组
+  /** @param {any} group */
   function renderGroup(group) {
     const isCollapsed = collapsedGroups.has(group.id);
     const creatorClass = group.createdBy === 'ai' ? 'ai-created' : 'user-created';
@@ -306,6 +345,7 @@
   }
 
   // 递归统计书签数量
+  /** @param {any[]} bookmarks */
   function countAllBookmarks(bookmarks) {
     let count = 0;
     for (const bookmark of bookmarks) {
@@ -318,6 +358,13 @@
   }
 
   // 渲染书签树 (支持层级)
+  /**
+   * @param {any[]} bookmarks
+   * @param {string} groupId
+   * @param {string|null} parentId
+   * @param {number} depth
+   * @returns {string}
+   */
   function renderBookmarkTree(bookmarks, groupId, parentId, depth) {
     if (!bookmarks || bookmarks.length === 0) return '';
 
@@ -344,6 +391,7 @@
       }
 
       // 获取子书签
+      /** @type {string} */
       const childrenHtml = hasChildren
         ? renderBookmarkTree(bookmarks, groupId, bookmark.id, depth + 1)
         : '';
@@ -353,6 +401,15 @@
   }
 
   // 渲染单个书签 - 嵌套包裹结构
+  /**
+   * @param {any} bookmark
+   * @param {string} groupId
+   * @param {number} depth
+   * @param {boolean} hasChildren
+   * @param {boolean} isCollapsed
+   * @param {string} childrenHtml
+   * @returns {string}
+   */
   function renderBookmark(bookmark, groupId, depth, hasChildren, isCollapsed, childrenHtml) {
     const category = bookmark.category || 'note';
 
@@ -387,7 +444,7 @@
           </div>
         `;
       } else {
-        headerHtml = window.renderBookmarkHeaderTree(bookmark, hasChildren, isCollapsed, depth);
+        headerHtml = (/** @type {any} */ (window)).renderBookmarkHeaderTree(bookmark, hasChildren, isCollapsed, depth);
       }
     } else {
       // Nested 模式: 使用 Flexbox 布局
@@ -404,7 +461,7 @@
           </div>
         `;
       } else {
-        headerHtml = window.renderBookmarkHeaderNested(bookmark, hasChildren, isCollapsed);
+        headerHtml = (/** @type {any} */ (window)).renderBookmarkHeaderNested(bookmark, hasChildren, isCollapsed);
       }
     }
 
@@ -444,6 +501,7 @@
   }
 
   // 格式化位置显示
+  /** @param {string} location */
   function formatLocation(location) {
     if (!location) return '';
     // 只显示文件名和行号
@@ -463,17 +521,16 @@
   }
 
   // 暴露工具函数到全局作用域 (供外部渲染文件使用)
-  // @ts-ignore - Dynamic property added at runtime for mode-specific rendering
-  window.escapeHtml = escapeHtml;
-  // @ts-ignore - Dynamic property added at runtime for mode-specific rendering
-  window.formatLocation = formatLocation;
+  /** @type {any} */ (window).escapeHtml = escapeHtml;
+  /** @type {any} */ (window).formatLocation = formatLocation;
 
   // 处理书签点击事件 (事件委托)
+  /** @param {MouseEvent} e */
   function handleBookmarkClick(e) {
     hideContextMenu(); // 关闭可能打开的右键菜单
 
     // 检查是否点击了文件链接
-    const fileLink = e.target.closest('.file-link');
+    const fileLink = /** @type {HTMLElement} */ (e.target).closest('.file-link');
     if (fileLink) {
       e.preventDefault();
       e.stopPropagation();
@@ -492,20 +549,20 @@
     }
 
     // 检查是否点击了 bookmark-chevron
-    const chevron = e.target.closest('.bookmark-chevron');
+    const chevron = /** @type {HTMLElement} */ (e.target).closest('.bookmark-chevron');
     if (chevron) {
       e.preventDefault();
       e.stopPropagation();
       const container = chevron.closest('.bookmark-container');
-      if (container) {
-        const bookmarkId = container.getAttribute('data-bookmark-id');
+      const bookmarkId = container?.getAttribute('data-bookmark-id');
+      if (bookmarkId) {
         toggleBookmark(bookmarkId);
       }
       return;
     }
 
     // 检查是否点击了展开/折叠按钮
-    const toggleBtn = e.target.closest('.bookmark-toggle-btn');
+    const toggleBtn = /** @type {HTMLElement} */ (e.target).closest('.bookmark-toggle-btn');
     if (toggleBtn) {
       e.preventDefault();
       e.stopPropagation();
@@ -521,7 +578,7 @@
     }
 
     // 检查是否点击了编辑表单区域
-    const editForm = e.target.closest('.bookmark-edit-form');
+    const editForm = /** @type {HTMLElement} */ (e.target).closest('.bookmark-edit-form');
     if (editForm) {
       // 点击表单区域不触发任何操作
       e.stopPropagation();
@@ -529,14 +586,14 @@
     }
 
     // 检查是否点击了 description 区域
-    const descElement = e.target.closest('.bookmark-description');
+    const descElement = /** @type {HTMLElement} */ (e.target).closest('.bookmark-description');
     if (descElement) {
       // 点击 description 不跳转
       return;
     }
 
     // 检查是否点击了书签项
-    const bookmarkItem = e.target.closest('.bookmark-item');
+    const bookmarkItem = /** @type {HTMLElement} */ (e.target).closest('.bookmark-item');
     if (bookmarkItem) {
       e.stopPropagation();
 
@@ -564,19 +621,20 @@
 
   // 绑定分组事件
   function bindGroupEvents() {
-    document.querySelectorAll('.group-header').forEach(header => {
+    document.querySelectorAll('.group-header').forEach(el => {
+      const header = /** @type {HTMLElement} */ (el);
       header.addEventListener('click', (e) => {
         e.stopPropagation();
         hideContextMenu(); // 关闭可能打开的右键菜单
         const groupId = header.getAttribute('data-group-id');
-        toggleGroup(groupId);
+        if (groupId) toggleGroup(groupId);
       });
 
       header.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
         const groupId = header.getAttribute('data-group-id');
-        showGroupContextMenu(e, groupId);
+        if (groupId) showGroupContextMenu(e, groupId);
       });
     });
   }
@@ -585,7 +643,8 @@
   function bindBookmarkEvents() {
     // 只绑定 contextmenu 事件（不会冒泡，必须单独绑定）
     // 其他事件（click）已通过事件委托在 groupsList 上处理
-    document.querySelectorAll('.bookmark-item').forEach(item => {
+    document.querySelectorAll('.bookmark-item').forEach(el => {
+      const item = /** @type {HTMLElement} */ (el);
       item.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -596,15 +655,18 @@
 
         const bookmarkId = container.getAttribute('data-bookmark-id');
         const groupId = container.getAttribute('data-group-id');
-        showBookmarkContextMenu(e, bookmarkId, groupId);
+        if (bookmarkId && groupId) showBookmarkContextMenu(e, bookmarkId, groupId);
       });
     });
   }
 
   // 切换分组展开/折叠
+  /** @param {string} groupId */
   function toggleGroup(groupId) {
     const header = document.querySelector(`.group-header[data-group-id="${groupId}"]`);
     const list = document.querySelector(`.bookmarks-list[data-group-id="${groupId}"]`);
+
+    if (!header || !list) return;
 
     if (collapsedGroups.has(groupId)) {
       collapsedGroups.delete(groupId);
@@ -620,6 +682,7 @@
   }
 
   // 切换书签展开/折叠
+  /** @param {string} bookmarkId */
   function toggleBookmark(bookmarkId) {
     // data-bookmark-id 和 collapsed 类在 .bookmark-container 上
     const container = document.querySelector(`.bookmark-container[data-bookmark-id="${bookmarkId}"]`);
@@ -659,6 +722,7 @@
    */
   function enterFullEditMode(bookmarkId) {
     // 查找书签数据
+    /** @type {any} */
     let bookmark = null;
     for (const group of currentData.groups) {
       bookmark = findBookmarkById(bookmarkId, group.bookmarks || []);
@@ -706,11 +770,11 @@
     }
 
     // 绑定保存和取消事件
-    const saveBtn = bookmarkContent.querySelector('.form-btn-save');
-    const cancelBtn = bookmarkContent.querySelector('.form-btn-cancel');
-    const titleInput = bookmarkContent.querySelector('#edit-title');
-    const locationInput = bookmarkContent.querySelector('#edit-location');
-    const descriptionTextarea = bookmarkContent.querySelector('#edit-description');
+    const saveBtn = /** @type {HTMLButtonElement} */ (bookmarkContent.querySelector('.form-btn-save'));
+    const cancelBtn = /** @type {HTMLButtonElement} */ (bookmarkContent.querySelector('.form-btn-cancel'));
+    const titleInput = /** @type {HTMLInputElement} */ (bookmarkContent.querySelector('#edit-title'));
+    const locationInput = /** @type {HTMLInputElement} */ (bookmarkContent.querySelector('#edit-location'));
+    const descriptionTextarea = /** @type {HTMLTextAreaElement} */ (bookmarkContent.querySelector('#edit-description'));
 
     if (!saveBtn || !cancelBtn || !titleInput || !locationInput || !descriptionTextarea) {
       console.warn('Cannot find form elements');
@@ -753,7 +817,9 @@
 
     // 取消函数
     function cancel() {
-      bookmarkContent.innerHTML = originalHTML;
+      if (bookmarkContent) {
+        bookmarkContent.innerHTML = originalHTML;
+      }
       // 重新绑定事件
       bindBookmarkEvents();
     }
@@ -763,6 +829,7 @@
     cancelBtn.addEventListener('click', cancel);
 
     // 快捷键
+    /** @param {KeyboardEvent} e */
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -793,7 +860,7 @@
 
   /**
    * 创建编辑表单 HTML
-   * @param {Object} bookmark - 书签对象
+   * @param {any} bookmark - 书签对象
    * @returns {string} 表单 HTML
    */
   function createEditForm(bookmark) {
@@ -830,9 +897,10 @@
    * @param {string} title - 标题
    * @param {string} location - 位置
    * @param {string} description - 描述
-   * @returns {Object} 验证结果
+   * @returns {{isValid: boolean, errors: Record<string, string>}} 验证结果
    */
   function validateInputs(title, location, description) {
+    /** @type {Record<string, string>} */
     const errors = {};
 
     // Title 验证
@@ -916,7 +984,12 @@
   }
 
   // 显示分组右键菜单
+  /**
+   * @param {MouseEvent} e
+   * @param {string} groupId
+   */
   function showGroupContextMenu(e, groupId) {
+    if (!contextMenu) return;
     contextMenuTarget = { type: 'group', id: groupId };
     contextMenu.innerHTML = `
       <div class="context-menu-item" data-action="editGroup">
@@ -934,7 +1007,13 @@
   }
 
   // 显示书签右键菜单
+  /**
+   * @param {MouseEvent} e
+   * @param {string} bookmarkId
+   * @param {string} groupId
+   */
   function showBookmarkContextMenu(e, bookmarkId, groupId) {
+    if (!contextMenu) return;
     contextMenuTarget = { type: 'bookmark', id: bookmarkId, groupId };
     contextMenu.innerHTML = `
       <div class="context-menu-item" data-action="editBookmark">
@@ -973,7 +1052,12 @@
   }
 
   // 显示 context menu
+  /**
+   * @param {number} x
+   * @param {number} y
+   */
   function showContextMenu(x, y) {
+    if (!contextMenu) return;
     contextMenu.style.display = 'block';
     contextMenu.style.left = `${x}px`;
     contextMenu.style.top = `${y}px`;
@@ -990,11 +1074,18 @@
 
   // 隐藏 context menu
   function hideContextMenu() {
-    contextMenu.style.display = 'none';
+    if (contextMenu) {
+      contextMenu.style.display = 'none';
+    }
     contextMenuTarget = null;
   }
 
   // 查找书签 (递归搜索包括子书签)
+  /**
+   * @param {string} bookmarkId
+   * @param {any[]} bookmarks
+   * @returns {any}
+   */
   function findBookmarkById(bookmarkId, bookmarks) {
     for (const bookmark of bookmarks) {
       if (bookmark.id === bookmarkId) {
@@ -1009,6 +1100,7 @@
   }
 
   // 复制书签信息到剪贴板
+  /** @param {string} bookmarkId */
   function copyBookmarkInfo(bookmarkId) {
     // 在所有分组中查找书签
     for (const group of currentData.groups) {
@@ -1028,6 +1120,7 @@
   }
 
   // 复制相对路径到剪贴板
+  /** @param {string} bookmarkId */
   function copyRelativePath(bookmarkId) {
     // 在所有分组中查找书签
     for (const group of currentData.groups) {
@@ -1046,6 +1139,7 @@
   }
 
   // 复制绝对路径到剪贴板
+  /** @param {string} bookmarkId */
   function copyAbsolutePath(bookmarkId) {
     // 在所有分组中查找书签
     for (const group of currentData.groups) {
@@ -1112,7 +1206,7 @@
   /**
    * 处理当前光标位置返回
    * @param {string|null} location - 光标位置
-   * @param {string} error - 错误信息
+   * @param {string | undefined} error - 错误信息
    */
   function handleCurrentLocation(location, error) {
     if (!addBookmarkContext) {
@@ -1285,16 +1379,19 @@
 
   // 绑定 context menu 动作
   function bindContextMenuActions() {
-    contextMenu.querySelectorAll('.context-menu-item').forEach(item => {
+    if (!contextMenu) return;
+    contextMenu.querySelectorAll('.context-menu-item').forEach(el => {
+      const item = /** @type {HTMLElement} */ (el);
       item.addEventListener('click', () => {
         const action = item.getAttribute('data-action');
-        handleContextMenuAction(action);
+        if (action) handleContextMenuAction(action);
         hideContextMenu();
       });
     });
   }
 
   // 处理 context menu 动作
+  /** @param {string} action */
   function handleContextMenuAction(action) {
     if (!contextMenuTarget) return;
 
@@ -1316,12 +1413,12 @@
         copyAbsolutePath(contextMenuTarget.id);
         break;
       case 'addBookmarkAfter':
-        if (contextMenuTarget.type === 'bookmark') {
+        if (contextMenuTarget.type === 'bookmark' && contextMenuTarget.groupId) {
           addBookmarkAfter(contextMenuTarget.id, contextMenuTarget.groupId);
         }
         break;
       case 'addChildBookmark':
-        if (contextMenuTarget.type === 'bookmark') {
+        if (contextMenuTarget.type === 'bookmark' && contextMenuTarget.groupId) {
           addChildBookmark(contextMenuTarget.id, contextMenuTarget.groupId);
         }
         break;
@@ -1337,7 +1434,10 @@
 
 
   // 处理搜索结果
+  /** @param {any} data */
   function handleSearchResults(data) {
+    if (!loadingState || !emptyState || !groupsList || !noResultsState || !searchResults) return;
+
     loadingState.style.display = 'none';
     emptyState.style.display = 'none';
     groupsList.style.display = 'none';
@@ -1350,18 +1450,21 @@
 
     noResultsState.style.display = 'none';
     searchResults.style.display = 'block';
-    searchResults.innerHTML = data.results.map(result => renderSearchResult(result)).join('');
+    searchResults.innerHTML = data.results.map((/** @type {any} */ result) => renderSearchResult(result)).join('');
 
     // 绑定搜索结果点击事件
     searchResults.querySelectorAll('.search-result-item').forEach(item => {
       item.addEventListener('click', () => {
         const bookmarkId = item.getAttribute('data-bookmark-id');
-        vscode.postMessage({ type: 'jumpToBookmark', bookmarkId });
+        if (bookmarkId) {
+          vscode.postMessage({ type: 'jumpToBookmark', bookmarkId });
+        }
       });
     });
   }
 
   // 渲染搜索结果项
+  /** @param {any} result */
   function renderSearchResult(result) {
     const { bookmark, group } = result;
     const category = bookmark.category || 'note';
@@ -1378,6 +1481,7 @@
   }
 
   // 处理键盘事件
+  /** @param {KeyboardEvent} e */
   function handleKeyDown(e) {
     // Escape 关闭 context menu
     if (e.key === 'Escape') {
@@ -1386,20 +1490,24 @@
   }
 
   // 工具函数: 防抖
+  /**
+   * @param {Function} fn
+   * @param {number} delay
+   * @returns {Function}
+   */
   function debounce(fn, delay) {
+    /** @type {any} */
     let timer = null;
-    return function (...args) {
-      clearTimeout(timer);
-      timer = setTimeout(() => fn.apply(this, args), delay);
-    };
-  }
-
-  // 工具函数: HTML 转义
-  function escapeHtml(str) {
-    if (!str) return '';
-    const div = document.createElement('div');
-    div.textContent = str;
-    return div.innerHTML;
+    return (
+      /**
+       * @this {any}
+       * @param {any[]} args
+       */
+      function (...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      }
+    );
   }
 
   /**
@@ -1421,18 +1529,24 @@
 
     try {
       // 配置 marked 的自定义渲染器来处理链接
-      const renderer = new marked.Renderer();
+      const renderer = new (/** @type {any} */ (marked).Renderer)();
       
       // 自定义链接渲染: 将 [text](path) 或 [text](path:line) 转换为可点击的链接
+      /** 
+       * @param {string} href 
+       * @param {string} title 
+       * @param {string} text 
+       */
       renderer.link = function(href, title, text) {
         // 解析文件路径和行号
-        let filePath = href;
+        let filePath = href || '';
+        /** @type {number | undefined} */
         let line = undefined;
         
-        const colonIndex = href.lastIndexOf(':');
+        const colonIndex = filePath.lastIndexOf(':');
         if (colonIndex > 0) {
-          const beforeColon = href.substring(0, colonIndex);
-          const afterColon = href.substring(colonIndex + 1);
+          const beforeColon = filePath.substring(0, colonIndex);
+          const afterColon = filePath.substring(colonIndex + 1);
           
           // 检查冒号后面是否是行号
           const lineMatch = afterColon.match(/^(\d+)/);
@@ -1451,7 +1565,7 @@
       };
 
       // 配置 marked
-      marked.setOptions({
+      /** @type {any} */ (marked).setOptions({
         breaks: true,        // 支持换行
         gfm: true,          // GitHub Flavored Markdown
         headerIds: false,   // 禁用标题 ID
@@ -1460,10 +1574,10 @@
       });
 
       // 渲染 Markdown
-      const rawHtml = marked.parse(markdown);
+      const rawHtml = /** @type {any} */ (marked).parse(markdown);
 
       // DOMPurify 清理 - 现在允许 <a> 标签和 data- 属性
-      const cleanHtml = DOMPurify.sanitize(rawHtml, {
+      const cleanHtml = /** @type {any} */ (DOMPurify).sanitize(rawHtml, {
         ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'code', 'pre', 'ul', 'ol', 'li', 'blockquote', 's', 'del', 'a'],
         ALLOWED_ATTR: ['class', 'data-file-path', 'data-line', 'title', 'href'],
         FORBID_TAGS: ['script', 'style', 'iframe', 'object', 'embed', 'img'],
@@ -1478,6 +1592,10 @@
   }
 
   // 工具函数: 截断文本
+  /**
+   * @param {string} str
+   * @param {number} maxLength
+   */
   function truncate(str, maxLength) {
     if (!str || str.length <= maxLength) return str;
     return str.substring(0, maxLength) + '...';
@@ -1579,7 +1697,8 @@
     }
 
     // 4. 如果是子书签, 展开所有父书签
-    let currentContainer = bookmarkElement;
+    /** @type {HTMLElement | null} */
+    let currentContainer = /** @type {HTMLElement} */ (bookmarkElement);
     while (currentContainer) {
       // 找到当前容器的父元素 .children-list (如果有的话)
       const parentChildrenList = currentContainer.closest('.children-list');
@@ -1595,7 +1714,7 @@
 
       // 展开父书签
       collapsedBookmarks.delete(parentBookmarkId);
-      const parentContainer = document.querySelector(`.bookmark-container[data-bookmark-id="${parentBookmarkId}"]`);
+      const parentContainer = /** @type {HTMLElement | null} */ (document.querySelector(`.bookmark-container[data-bookmark-id="${parentBookmarkId}"]`));
       if (parentContainer) {
         parentContainer.classList.remove('collapsed');
         const childrenList = parentContainer.querySelector('.children-list');

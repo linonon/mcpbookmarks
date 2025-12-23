@@ -791,7 +791,7 @@ npx vsce package
   "mcpServers": {
     "mcp-bookmarks": {
       "command": "node",
-      "args": ["${workspaceFolder}/.vscode/mcp-bookmarks-mcp/server.js"],
+      "args": ["/Users/YOUR_USERNAME/.vscode/mcp-bookmarks-launcher.js"],
       "description": "AI 書籤管理 - 在代碼中標記和說明重要位置"
     }
   }

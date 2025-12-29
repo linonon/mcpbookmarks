@@ -314,12 +314,75 @@ body {
 .group-name {
   font-size: var(--font-size-group-name);
   font-weight: 700;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
   letter-spacing: 0.2px;
   flex-shrink: 0;         /* 不收缩，保证标题完整 */
+}
+
+/* Group Description - 仿照书签 Description 设计 */
+.group-description-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  margin-top: 2px;
+}
+
+.group-description-toggle-btn {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: var(--vscode-foreground);
+  opacity: 0.5;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  transition: all 0.2s ease;
+  margin-top: 1px;
+}
+
+.group-description-toggle-btn:hover {
+  opacity: 1;
+  background-color: var(--vscode-toolbar-hoverBackground);
+}
+
+.group-description {
+  font-size: var(--font-size-description);
+  color: #ffffff;
+  padding: 0;
+  margin: 0;
+  opacity: 0.7;
+  min-width: 0;
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+
+  /* 默认显示 1 行，和书签 Description 逻辑一致 */
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.group-description.expanded {
+  -webkit-line-clamp: unset;
+  display: block;
+}
+
+.group-description:hover {
+  opacity: 0.9;
 }
 
 /* 数字徽章 - 更醒目的设计 */
@@ -339,68 +402,6 @@ body {
 .group-header.user-created .group-count {
   background: linear-gradient(135deg, #f59e0b, #fb923c);  /* 用户创建用橙色 */
   box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
-}
-
-/* 问题说明 - 仿照书签 Description 设计 */
-.group-query-wrapper {
-  display: flex;
-  align-items: flex-start;
-  gap: 4px;
-  width: 100%;
-  margin-top: 2px;
-}
-
-.group-query-toggle-btn {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  padding: 0;
-  margin: 0;
-  border: none;
-  background: transparent;
-  color: var(--vscode-foreground);
-  opacity: 0.5;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 2px;
-  transition: all 0.2s ease;
-  margin-top: 1px;
-}
-
-.group-query-toggle-btn:hover {
-  opacity: 1;
-  background-color: var(--vscode-toolbar-hoverBackground);
-}
-
-.group-query {
-  font-size: var(--font-size-description);
-  color: var(--vscode-descriptionForeground);
-  padding: 0;
-  margin: 0;
-  opacity: 0.7;
-  min-width: 0;
-  flex: 1;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  line-height: 1.4;
-
-  /* 默认显示 1 行，和书签 Description 逻辑一致 */
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.group-query.expanded {
-  -webkit-line-clamp: unset;
-  display: block;
-}
-
-.group-query:hover {
-  opacity: 0.9;
 }
 
 /* Bookmarks List - 书签容器样式 */
@@ -684,6 +685,7 @@ body {
 .bookmark-title {
   font-size: var(--font-size-title);
   font-weight: 500;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1111,25 +1113,25 @@ body {
 /* ==================== Markdown 渲染样式 ==================== */
 
 .bookmark-description p,
-.group-query p {
+.group-description p {
   margin: 0;
   padding: 0;
 }
 
 .bookmark-description strong,
-.group-query strong {
+.group-description strong {
   font-weight: 600;
   color: #ffffff;
 }
 
 .bookmark-description em,
-.group-query em {
+.group-description em {
   font-style: italic;
   color: #e0e0e0;
 }
 
 .bookmark-description code,
-.group-query code {
+.group-description code {
   background: rgba(255, 255, 255, 0.1);
   padding: 1px 4px;
   border-radius: 3px;
@@ -1138,7 +1140,8 @@ body {
   color: #ffcc99;
 }
 
-.bookmark-description pre {
+.bookmark-description pre,
+.group-description pre {
   background: rgba(0, 0, 0, 0.3);
   padding: 6px 8px;
   border-radius: 4px;
@@ -1146,23 +1149,28 @@ body {
   overflow-x: auto;
 }
 
-.bookmark-description pre code {
+.bookmark-description pre code,
+.group-description pre code {
   background: none;
   padding: 0;
   color: #cccccc;
 }
 
 .bookmark-description ul,
-.bookmark-description ol {
+.bookmark-description ol,
+.group-description ul,
+.group-description ol {
   margin: 4px 0;
   padding-left: 20px;
 }
 
-.bookmark-description li {
+.bookmark-description li,
+.group-description li {
   margin: 2px 0;
 }
 
-.bookmark-description blockquote {
+.bookmark-description blockquote,
+.group-description blockquote {
   border-left: 3px solid rgba(255, 255, 255, 0.3);
   padding-left: 8px;
   margin: 4px 0;
@@ -1171,25 +1179,30 @@ body {
 }
 
 .bookmark-description s,
-.bookmark-description del {
+.bookmark-description del,
+.group-description s,
+.group-description del {
   text-decoration: line-through;
   opacity: 0.6;
 }
 
 /* 文件链接样式 */
-.bookmark-description .file-link {
+.bookmark-description .file-link,
+.group-description .file-link {
   color: var(--vscode-textLink-foreground);
   text-decoration: none;
   cursor: pointer;
   transition: color 0.15s ease;
 }
 
-.bookmark-description .file-link:hover {
+.bookmark-description .file-link:hover,
+.group-description .file-link:hover {
   color: var(--vscode-textLink-activeForeground);
   text-decoration: underline;
 }
 
-.bookmark-description .file-link:active {
+.bookmark-description .file-link:active,
+.group-description .file-link:active {
   color: var(--vscode-textLink-activeForeground);
 }
 
@@ -1417,6 +1430,47 @@ body {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 
+/* ============ 分组编辑表单样式 ============ */
+
+/* 分组编辑表单 */
+.group-edit-form {
+  padding: 12px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+}
+
+/* 只读信息区域 */
+.form-info-section {
+  margin: 16px 0;
+  padding: 12px;
+  background: var(--vscode-textBlockQuote-background);
+  border-left: 3px solid var(--vscode-textBlockQuote-border);
+  border-radius: 2px;
+}
+
+.form-info-row {
+  display: flex;
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+
+.form-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.form-info-row label {
+  min-width: 100px;
+  font-weight: 600;
+  color: var(--vscode-descriptionForeground);
+}
+
+.form-info-value {
+  flex: 1;
+  color: var(--vscode-foreground);
+  word-break: break-word;
+}
+
 /* ====================================================================================== */
 
 /*                                      TREE VIEW STYLE                                   */
@@ -1482,15 +1536,12 @@ body {
 
 
 .view-mode-tree .group-name {
-
-  font-size: var(--font-size-group-name) !important;
-
+  font-size: var(--font-size-title) !important;  /* 改为与 bookmark title 相同的 13px */
+  font-weight: 400 !important;  /* 改为与 bookmark title 相同的 normal weight */
+  color: #ffffff !important;
   text-transform: uppercase;
-
   letter-spacing: 0.5px;
-
   opacity: 0.8;
-
 }
 
 
@@ -1503,7 +1554,7 @@ body {
 
   background: var(--vscode-badge-background) !important;
 
-  color: var(--vscode-badge-foreground) !important;
+  color: #ffffff !important;
 
   box-shadow: none !important;
 
@@ -1698,6 +1749,8 @@ body {
 
   font-weight: 400 !important;
 
+  color: #ffffff !important;
+
   flex: 0 1 auto;
 
 }
@@ -1794,21 +1847,12 @@ body {
 
 
 
-/* 如果想在树形图中也显示描述，可以取消上面的 display: none，并使用下面的样式 */
-
-/* 
-
+/* Tree 模式下的 description 样式 */
 .view-mode-tree .bookmark-description {
-
   font-size: 10px !important;
-
-  opacity: 0.5;
-
-  color: var(--vscode-descriptionForeground) !important;
-
-} 
-
-*/
+  opacity: 0.7 !important;
+  color: #ffffff !important;
+}
 
 
 

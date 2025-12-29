@@ -101,14 +101,14 @@ export class MCPHandlersStandalone {
   // create_group
   createGroup(args: WithProjectRoot<CreateGroupArgs>): ToolResult {
     try {
-      const { name, description, query, projectRoot } = args;
+      const { name, description, projectRoot } = args;
       const store = this.getStore(projectRoot);
 
       if (!name || typeof name !== 'string') {
         return { success: false, error: 'name is required and must be a string' };
       }
 
-      const groupId = store.createGroup(name, description, query, 'ai');
+      const groupId = store.createGroup(name, description, 'ai');
 
       return {
         success: true,

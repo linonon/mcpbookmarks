@@ -35,18 +35,17 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
   // (view-style button removed, now controlled by VSCode toolbar)
 
   // State
-  /** 
+  /**
    * @type {{
    *   groups: Array<{
    *     id: string;
    *     name: string;
    *     bookmarks: Array<any>;
    *     createdBy: string;
-   *     query?: string;
    *     description?: string;
    *   }>;
    *   viewMode: string;
-   * }} 
+   * }}
    */
   let currentData = { groups: [], viewMode: 'group' };
   
@@ -403,6 +402,18 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
           saveBtn.textContent = 'Save';
         }
         break;
+      case 'groupValidationError':
+        // 显示分组验证错误提示，重新启用保存按钮
+        if (message.field && message.error) {
+          showError(message.field, message.error);
+        }
+        // 重新启用按钮
+        const groupSaveBtn = /** @type {HTMLButtonElement|null} */ (document.querySelector('.group-edit-form .form-btn-save'));
+        if (groupSaveBtn) {
+          groupSaveBtn.disabled = false;
+          groupSaveBtn.textContent = 'Save';
+        }
+        break;
       case 'updateFontSize':
         if (message.config) {
           updateFontSize(message.config);
@@ -535,15 +546,15 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
           </span>
           <div class="group-info">
             <span class="group-name">${escapeHtml(group.name)}</span>
-            ${group.query ? `
-              <div class="group-query-wrapper">
-                <button class="group-query-toggle-btn" data-group-id="${escapeHtml(group.id)}" title="Expand/Collapse">
+            ${group.description ? `
+              <div class="group-description-wrapper">
+                <button class="group-description-toggle-btn" data-group-id="${escapeHtml(group.id)}" title="Expand/Collapse">
                   <span class="icon icon-expand"></span>
                 </button>
-                <div class="group-query" 
+                <div class="group-description"
                      data-group-id="${escapeHtml(group.id)}"
-                     title="${escapeHtml(group.query)}">
-                  ${renderMarkdown(group.query)}
+                     data-markdown="${escapeHtml(group.description)}">
+                  ${renderMarkdown(group.description)}
                 </div>
               </div>
             ` : ''}
@@ -743,19 +754,26 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
   function handleBookmarkClick(e) {
     hideContextMenu(); // 关闭可能打开的右键菜单
 
-    // 检查是否点击了 group query 展开/折叠按钮
-    const groupQueryToggleBtn = /** @type {HTMLElement} */ (e.target).closest('.group-query-toggle-btn');
-    if (groupQueryToggleBtn) {
+    // 检查是否点击了 group description 展开/折叠按钮 (优先级最高, 在 group-header 之前)
+    const groupToggleBtn = /** @type {HTMLElement} */ (e.target).closest('.group-description-toggle-btn');
+    if (groupToggleBtn) {
       e.preventDefault();
       e.stopPropagation();
-      const groupId = groupQueryToggleBtn.getAttribute('data-group-id');
-      const queryElement = document.querySelector(`.group-query[data-group-id="${groupId}"]`);
-      const icon = groupQueryToggleBtn.querySelector('.icon');
+      const groupId = groupToggleBtn.getAttribute('data-group-id');
+      const descElement = document.querySelector(`.group-description[data-group-id="${groupId}"]`);
+      const icon = groupToggleBtn.querySelector('.icon');
 
-      if (queryElement && icon) {
-        const isExpanded = queryElement.classList.toggle('expanded');
+      if (descElement && icon) {
+        const isExpanded = descElement.classList.toggle('expanded');
         icon.className = isExpanded ? 'icon icon-collapse' : 'icon icon-expand';
       }
+      return;
+    }
+
+    // 检查是否点击了 group description 区域 (阻止冒泡到 group-header)
+    const groupDescWrapper = /** @type {HTMLElement} */ (e.target).closest('.group-description-wrapper');
+    if (groupDescWrapper) {
+      e.stopPropagation();
       return;
     }
 
@@ -802,7 +820,7 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
       return;
     }
 
-    // 检查是否点击了展开/折叠按钮
+    // 检查是否点击了 bookmark description 展开/折叠按钮
     const toggleBtn = /** @type {HTMLElement} */ (e.target).closest('.bookmark-toggle-btn');
     if (toggleBtn) {
       e.preventDefault();
@@ -1222,6 +1240,217 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
    */
   function clearAllErrors() {
     ['error-title', 'error-location', 'error-description'].forEach(clearError);
+  }
+
+  // ============ 分组编辑功能 ============
+
+  /**
+   * 进入分组编辑模式
+   * @param {string} groupId - 分组 ID
+   */
+  function enterGroupEditMode(groupId) {
+    // 查找分组数据
+    const group = currentData.groups.find(g => g.id === groupId);
+    if (!group) {
+      console.warn('Cannot find group:', groupId);
+      return;
+    }
+
+    // 找到分组容器
+    const groupElement = document.querySelector(`.group-item[data-group-id="${groupId}"]`);
+    if (!groupElement) {
+      console.warn('Cannot find group element');
+      return;
+    }
+
+    const groupHeader = groupElement.querySelector('.group-header');
+    if (!groupHeader) {
+      console.warn('Cannot find group header');
+      return;
+    }
+
+    // 保存原始 HTML
+    const originalHTML = groupHeader.innerHTML;
+
+    // 创建编辑表单
+    const formHTML = createGroupEditForm(group);
+    groupHeader.innerHTML = formHTML;
+
+    // 阻止表单点击事件冒泡
+    const formElement = groupHeader.querySelector('.group-edit-form');
+    if (formElement) {
+      formElement.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    }
+
+    // 绑定保存和取消事件
+    const saveBtn = /** @type {HTMLButtonElement} */ (groupHeader.querySelector('.form-btn-save'));
+    const cancelBtn = /** @type {HTMLButtonElement} */ (groupHeader.querySelector('.form-btn-cancel'));
+    const nameInput = /** @type {HTMLInputElement} */ (groupHeader.querySelector('#edit-group-name'));
+    const descriptionTextarea = /** @type {HTMLTextAreaElement} */ (groupHeader.querySelector('#edit-group-description'));
+
+    if (!saveBtn || !cancelBtn || !nameInput || !descriptionTextarea) {
+      console.warn('Cannot find form elements');
+      groupHeader.innerHTML = originalHTML;
+      return;
+    }
+
+    // 保存函数
+    function save() {
+      const name = nameInput.value.trim();
+      const description = descriptionTextarea.value.trim();
+
+      // 前端验证
+      const validation = validateGroupInputs(name, description);
+      if (!validation.isValid) {
+        // 显示错误
+        for (const [field, error] of Object.entries(validation.errors)) {
+          showError(field, error);
+        }
+        return;
+      }
+
+      // 清除所有错误
+      clearGroupErrors();
+
+      // 禁用保存按钮
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Saving...';
+
+      // 发送更新消息
+      vscode.postMessage({
+        type: 'updateGroupFull',
+        groupId: groupId,
+        updates: { name, description }
+      });
+
+      // 注意: 成功后会收到 refresh 消息，不需要手动恢复
+    }
+
+    // 取消函数
+    function cancel() {
+      if (groupHeader) {
+        groupHeader.innerHTML = originalHTML;
+      }
+      // 重新绑定事件
+      bindGroupEvents();
+    }
+
+    // 绑定事件
+    saveBtn.addEventListener('click', save);
+    cancelBtn.addEventListener('click', cancel);
+
+    // 快捷键
+    /** @param {KeyboardEvent} e */
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        cancel();
+      } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        save();
+      }
+    };
+
+    nameInput.addEventListener('keydown', handleKeyDown);
+    descriptionTextarea.addEventListener('keydown', handleKeyDown);
+
+    // 自适应高度
+    function adjustHeight() {
+      descriptionTextarea.style.height = 'auto';
+      descriptionTextarea.style.height = descriptionTextarea.scrollHeight + 'px';
+    }
+
+    descriptionTextarea.addEventListener('input', adjustHeight);
+    adjustHeight(); // 初始化高度
+
+    // 聚焦到 name
+    nameInput.focus();
+    nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
+  }
+
+  /**
+   * 创建分组编辑表单 HTML
+   * @param {any} group - 分组对象
+   * @returns {string} 表单 HTML
+   */
+  function createGroupEditForm(group) {
+    const bookmarkCount = (group.bookmarks || []).length;
+    const createdDate = new Date(group.createdAt).toLocaleString();
+
+    return `
+      <div class="group-edit-form">
+        <div class="form-field">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="edit-group-name" value="${escapeHtml(group.name)}" maxlength="200">
+          <div class="form-error" id="error-group-name"></div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Description</label>
+          <textarea class="form-textarea" id="edit-group-description" maxlength="10000">${escapeHtml(group.description || '')}</textarea>
+          <div class="form-error" id="error-group-description"></div>
+        </div>
+
+        <div class="form-info-section">
+          <div class="form-info-row">
+            <label>Created by:</label>
+            <span class="form-info-value">${group.createdBy === 'ai' ? 'AI' : 'User'}</span>
+          </div>
+
+          <div class="form-info-row">
+            <label>Created at:</label>
+            <span class="form-info-value">${createdDate}</span>
+          </div>
+
+          <div class="form-info-row">
+            <label>Bookmarks:</label>
+            <span class="form-info-value">${bookmarkCount} bookmark${bookmarkCount !== 1 ? 's' : ''}</span>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="form-btn-save">Save</button>
+          <button class="form-btn-cancel">Cancel</button>
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * 验证分组输入
+   * @param {string} name - 分组名称
+   * @param {string} description - 分组说明
+   * @returns {{isValid: boolean, errors: Record<string, string>}} 验证结果
+   */
+  function validateGroupInputs(name, description) {
+    /** @type {Record<string, string>} */
+    const errors = {};
+
+    // Name 验证
+    if (!name) {
+      errors['error-group-name'] = 'Name is required';
+    } else if (name.length > 200) {
+      errors['error-group-name'] = 'Name is too long (max 200 characters)';
+    }
+
+    // Description 验证
+    if (description.length > 10000) {
+      errors['error-group-description'] = 'Description is too long (max 10000 characters)';
+    }
+
+    return {
+      isValid: Object.keys(errors).length === 0,
+      errors
+    };
+  }
+
+  /**
+   * 清除分组编辑表单的所有错误
+   */
+  function clearGroupErrors() {
+    ['error-group-name', 'error-group-description'].forEach(clearError);
   }
 
   // 显示分组右键菜单
@@ -1705,7 +1934,8 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
         }
         break;
       case 'editGroup':
-        vscode.postMessage({ type: 'editGroup', groupId: contextMenuTarget.id });
+        // 直接进入编辑模式
+        enterGroupEditMode(contextMenuTarget.id);
         break;
       case 'addGroupBookmark':
         if (contextMenuTarget.type === 'group') {

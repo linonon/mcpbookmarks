@@ -394,6 +394,12 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
         }
         break;
 
+      case 'updateGroupFull':
+        if (message.groupId && message.updates) {
+          await this.handleUpdateGroupFull(message.groupId, message.updates);
+        }
+        break;
+
       case 'requestCurrentLocation':
         this.handleRequestCurrentLocation();
         break;
@@ -743,6 +749,64 @@ export class BookmarkSidebarProvider implements vscode.WebviewViewProvider {
     this._view.webview.postMessage({
       type: 'validationError',
       field: `error-${field}`,
+      error: error
+    });
+  }
+
+  /**
+   * 处理分组完整更新
+   */
+  private async handleUpdateGroupFull(
+    groupId: string,
+    updates: { name: string; description?: string }
+  ): Promise<void> {
+    try {
+      // 1. 验证 name 必填
+      if (!updates.name || updates.name.trim().length === 0) {
+        this.sendGroupValidationError('group-name', 'Name is required');
+        return;
+      }
+
+      // 2. 验证 name 长度
+      if (updates.name.length > 200) {
+        this.sendGroupValidationError('group-name', 'Name is too long (max 200 characters)');
+        return;
+      }
+
+      // 3. 验证 description 长度
+      if (updates.description && updates.description.length > 10000) {
+        this.sendGroupValidationError('group-description', 'Description is too long (max 10000 characters)');
+        return;
+      }
+
+      // 4. 执行更新
+      this.bookmarkStore.updateGroup(groupId, {
+        name: updates.name.trim(),
+        description: updates.description?.trim() || ''
+      });
+
+      // 5. 刷新视图
+      await this.refresh();
+
+      // 6. 显示成功消息
+      vscode.window.showInformationMessage('Group updated successfully');
+
+    } catch (error) {
+      console.error('Error updating group:', error);
+      vscode.window.showErrorMessage(`Failed to update group: ${error}`);
+    }
+  }
+
+  /**
+   * 发送分组验证错误消息到 Webview
+   */
+  private sendGroupValidationError(field: string, error: string): void {
+    if (!this._view) {
+      return;
+    }
+    this._view.webview.postMessage({
+      type: 'groupValidationError',
+      field: field,
       error: error
     });
   }

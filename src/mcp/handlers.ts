@@ -31,13 +31,13 @@ export class MCPHandlers {
   // create_group - 创建一个新的书签分组
   createGroup(args: CreateGroupArgs): ToolResult {
     try {
-      const { name, description, query } = args;
+      const { name, description } = args;
 
       if (!name || typeof name !== 'string') {
         return { success: false, error: 'name is required and must be a string' };
       }
 
-      const groupId = this.store.createGroup(name, description, query, 'ai');
+      const groupId = this.store.createGroup(name, description, 'ai');
 
       return {
         success: true,

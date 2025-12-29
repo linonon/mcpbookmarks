@@ -94,7 +94,6 @@ export class BookmarkStoreManager {
   createGroup(
     name: string,
     description?: string,
-    query?: string,
     createdBy: 'ai' | 'user' = 'ai'
   ): string {
     const id = uuidv4();
@@ -104,7 +103,6 @@ export class BookmarkStoreManager {
       id,
       name,
       description,
-      query,
       createdAt: now,
       updatedAt: now,
       createdBy,

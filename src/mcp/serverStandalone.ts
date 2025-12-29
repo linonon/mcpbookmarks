@@ -51,7 +51,7 @@ Then all subsequent bookmark operations will save to /Users/name/projects/myapp/
   },
   {
     name: 'create_group',
-    description: 'Create a new bookmark group. Groups are used to organize bookmarks by topic or query.',
+    description: 'Create a new bookmark group. Groups are used to organize bookmarks by topic or description.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -63,10 +63,6 @@ Then all subsequent bookmark operations will save to /Users/name/projects/myapp/
         description: {
           type: 'string',
           description: 'Group description'
-        },
-        query: {
-          type: 'string',
-          description: 'The user query that triggered this group creation (for AI-generated groups)'
         }
       },
       required: ['name']

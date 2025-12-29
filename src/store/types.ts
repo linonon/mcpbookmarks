@@ -34,7 +34,6 @@ export interface BookmarkGroup {
   id: string;                    // UUID
   name: string;                  // 分组名称，如 "Crash 游戏核心流程"
   description?: string;          // 分组说明
-  query?: string;                // 触发这个分组的用户问题(AI 生成时记录)
   createdAt: string;             // ISO timestamp
   updatedAt: string;
   createdBy: 'ai' | 'user';
@@ -60,7 +59,6 @@ export interface ParsedLocation {
 export interface CreateGroupArgs {
   name: string;
   description?: string;
-  query?: string;
 }
 
 export interface AddBookmarkArgs {

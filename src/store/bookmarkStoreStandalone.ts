@@ -67,7 +67,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
   createGroup(
     name: string,
     description?: string,
-    query?: string,
     createdBy: 'ai' | 'user' = 'ai'
   ): string {
     const id = uuidv4();
@@ -77,7 +76,6 @@ export class BookmarkStoreManagerStandalone extends EventEmitter {
       id,
       name,
       description,
-      query,
       createdAt: now,
       updatedAt: now,
       createdBy,

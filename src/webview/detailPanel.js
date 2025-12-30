@@ -220,5 +220,4 @@
   }
 
   // 初始化时显示加载状态
-  console.log('Bookmark detail panel initialized');
 })();

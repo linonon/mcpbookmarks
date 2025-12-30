@@ -12,7 +12,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
  */
 
 (function () {
-  console.log('🚀🚀🚀 [SIDEBAR.JS] FILE LOADED - NEW VERSION! 🚀🚀🚀');
 
   // @ts-ignore
   const vscode = (/** @type {any} */ (window)).acquireVsCodeApi();
@@ -58,12 +57,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
     if (savedState.viewMode) {
       uiState.viewMode = savedState.viewMode;
     }
-    console.log(`[State] Restored from persisted state:`, {
-      viewMode: savedState.viewMode,
-      collapsedGroups: savedState.collapsedGroups?.length || 0,
-      collapsedBookmarks: savedState.collapsedBookmarks?.length || 0,
-      scrollPosition: savedState.scrollPosition || 0
-    });
   }
 
   /** @type {Set<string>} */
@@ -85,12 +78,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
       timestamp: Date.now()
     };
     vscode.setState(state);
-    console.log('[State] Saved:', {
-      viewMode: state.viewMode,
-      collapsedGroups: state.collapsedGroups.length,
-      collapsedBookmarks: state.collapsedBookmarks.length,
-      scrollPosition: state.scrollPosition
-    });
   }
 
   /**
@@ -102,7 +89,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
         requestAnimationFrame(() => {
           if (bookmarksContainer) {
             bookmarksContainer.scrollTop = savedState.scrollPosition;
-            console.log(`[State] Restored scroll position: ${savedState.scrollPosition}px`);
           }
         });
       });
@@ -146,7 +132,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
    * @returns {Promise<void>}
    */
   async function preloadAllResources() {
-    console.log('[Preload] Starting resource preload...');
     const baseUrl = getBaseUrl();
     if (!baseUrl) {
       console.warn('[Preload] Could not determine base URL, skipping preload');
@@ -166,7 +151,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
           .then(response => response.text())
           .then(cssText => {
             cssCache[mode] = cssText;
-            console.log(`[Preload] Cached ${mode} CSS (${cssText.length} chars)`);
           })
           .catch(error => {
             console.error(`[Preload] Failed to cache ${mode} CSS:`, error);
@@ -187,7 +171,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
           script.style.display = 'none'; // 隐藏但加载
           script.onload = () => {
             jsCache[mode] = true;
-            console.log(`[Preload] Cached ${mode} JS`);
             resolve(undefined);
           };
           script.onerror = (error) => {
@@ -201,7 +184,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
 
     try {
       await Promise.all(preloadPromises);
-      console.log('[Preload] All resources preloaded successfully');
     } catch (error) {
       console.error('[Preload] Some resources failed to preload:', error);
     }
@@ -224,7 +206,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
       style.id = 'mode-specific-css';
       style.textContent = cssCache[mode];
       document.head.appendChild(style);
-      console.log(`[CSS] Applied ${mode} CSS from cache (instant)`);
       return;
     }
 
@@ -237,7 +218,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
     link.href = baseUrl + fileName;
     document.head.appendChild(link);
 
-    console.log(`[CSS] Loaded ${mode} CSS from network (fallback)`);
   }
 
   /**
@@ -248,7 +228,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
   function loadModeSpecificJS(mode) {
     // 优先使用缓存 (JS 已在预加载时执行,无需重新加载)
     if (jsCache[mode]) {
-      console.log(`[JS] Using preloaded ${mode} JS (instant)`);
       return Promise.resolve(undefined);
     }
 
@@ -260,7 +239,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
       const fileName = mode === 'tree' ? 'sidebar-tree.js' : 'sidebar-nested.js';
       script.src = baseUrl + fileName;
       script.onload = () => {
-        console.log(`[JS] Loaded ${mode} JS from network (fallback)`);
         jsCache[mode] = true; // 更新缓存
         resolve(undefined);
       };
@@ -274,7 +252,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
 
   // 初始化
   async function init() {
-    console.log('✅✅✅ [INIT] Starting initialization... ✅✅✅');
 
     // 恢复容器 class
     if (bookmarksContainer) {
@@ -289,7 +266,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
     loadModeSpecificCSS(uiState.viewMode);
     await loadModeSpecificJS(uiState.viewMode);
     setupEventListeners();
-    console.log('✅✅✅ [INIT] Event listeners setup complete ✅✅✅');
 
     // 在后台预加载所有资源 (不阻塞初始化)
     preloadAllResources().catch(error => {
@@ -298,7 +274,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
 
     // 通知 Extension 已准备好
     vscode.postMessage({ type: 'ready' });
-    console.log('✅✅✅ [INIT] Initialization complete! ✅✅✅');
   }
 
   /**
@@ -333,7 +308,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
 
   // 设置事件监听
   function setupEventListeners() {
-    console.log('[Setup] Initializing event listeners...');
 
     // 全局点击 (关闭 context menu)
     document.addEventListener('click', () => {
@@ -465,11 +439,9 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
   // 处理刷新数据
   /** @param {any} data */
   function handleRefresh(data) {
-    console.log('[Sidebar] Received refresh data:', data);
 
     // 同步视图模式 (从 Extension 同步)
     if (data.viewStyle && data.viewStyle !== uiState.viewMode) {
-      console.log(`[Sidebar] Syncing viewStyle from extension: ${data.viewStyle}`);
       uiState.viewMode = data.viewStyle;
       vscode.setState({ viewMode: uiState.viewMode });
       
@@ -604,16 +576,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
       const hasChildren = bookmarks.some(b => b.parentId === bookmark.id);
       const isCollapsed = collapsedBookmarks.has(bookmark.id);
 
-      // 调试输出
-      if (hasChildren) {
-        console.log('[Chevron Debug] Bookmark with children:', {
-          title: bookmark.title,
-          id: bookmark.id,
-          hasChildren,
-          childCount: bookmarks.filter(/** @param {any} b */ b => b.parentId === bookmark.id).length
-        });
-      }
-
       // 获取子书签
       /** @type {string} */
       const childrenHtml = hasChildren
@@ -636,17 +598,6 @@ const DOMPurify = /** @type {any} */ (window).DOMPurify;
    */
   function renderBookmark(bookmark, groupId, depth, hasChildren, isCollapsed, childrenHtml) {
     const category = bookmark.category || 'note';
-
-    // 调试输出 - 验证 chevron HTML 生成
-    if (hasChildren) {
-      console.log('[Chevron Render Debug]', {
-        title: bookmark.title,
-        id: bookmark.id,
-        hasChildren,
-        willRenderChevron: true,
-        containerClasses: `has-children ${isCollapsed ? 'collapsed' : ''}`
-      });
-    }
 
     // 根据视图模式渲染 header
     let headerHtml;

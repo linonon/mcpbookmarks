@@ -17,7 +17,6 @@ let detailProvider: BookmarkDetailProvider | undefined;
 let statusBarItem: vscode.StatusBarItem | undefined;
 
 export function activate(context: vscode.ExtensionContext): void {
-  console.log('MCP Bookmarks extension is activating...');
 
   // Install/update launcher script to fixed location
   installLauncher(context).catch((err: any) => {
@@ -27,7 +26,6 @@ export function activate(context: vscode.ExtensionContext): void {
   // Get workspace root
   const workspaceFolders = vscode.workspace.workspaceFolders;
   if (!workspaceFolders || workspaceFolders.length === 0) {
-    console.log('No workspace folder found, MCP Bookmarks will not activate');
     return;
   }
 
@@ -123,7 +121,6 @@ export function activate(context: vscode.ExtensionContext): void {
     }
   });
 
-  console.log('MCP Bookmarks extension activated');
 }
 
 function updateStatusBar(): void {
@@ -230,7 +227,6 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         try {
           const absoluteUri = vscode.Uri.file(parsed.filePath);
           await jumpToDocument(absoluteUri);
-          console.log(`Jumped to bookmark using absolute path: ${parsed.filePath}`);
         } catch (error2) {
           vscode.window.showErrorMessage(
             `Failed to jump to bookmark "${bookmark.title}".\n` +
@@ -351,7 +347,7 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
           return;
         }
 
-        groupId = bookmarkStore.createGroup(groupName, undefined, undefined, 'user');
+        groupId = bookmarkStore.createGroup(groupName, undefined, 'user');
       } else {
         groupId = selectedGroup.detail!;
       }
@@ -427,7 +423,7 @@ function registerCommands(context: vscode.ExtensionContext, workspaceRoot: strin
         'Enter group description (optional, close tab to skip)'
       );
 
-      bookmarkStore.createGroup(name, description || undefined, undefined, 'user');
+      bookmarkStore.createGroup(name, description || undefined, 'user');
       vscode.window.showInformationMessage(`Group "${name}" created`);
     })
   );
@@ -1377,7 +1373,6 @@ async function installLauncher(context: vscode.ExtensionContext): Promise<void> 
         await fs.promises.chmod(launcherDst, 0o755);
       }
 
-      console.log(`MCP Bookmarks launcher installed/updated at: ${launcherDst}`);
 
       // 首次安装时显示提示
       if (!dstHash) {

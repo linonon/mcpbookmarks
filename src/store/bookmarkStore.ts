@@ -57,7 +57,6 @@ export class BookmarkStoreManager {
       const oldPath = path.join(this.workspaceRoot, STORE_DIR, 'ai-bookmarks.json');
       if (fs.existsSync(oldPath) && !fs.existsSync(this.storePath)) {
         fs.renameSync(oldPath, this.storePath);
-        console.log('Migrated ai-bookmarks.json to mcp-bookmarks.json');
       }
 
       if (fs.existsSync(this.storePath)) {

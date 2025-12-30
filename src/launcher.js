@@ -101,8 +101,6 @@ function main() {
 
   // 调试信息 (可选)
   if (process.env.DEBUG_MCP_LAUNCHER) {
-    console.log(`Using MCP Bookmarks from: ${latestDir}`);
-    console.log(`Server path: ${serverPath}`);
   }
 
   // 启动 MCP server, 转发所有参数

@@ -34,6 +34,7 @@ export interface BookmarkGroup {
   id: string;                    // UUID
   name: string;                  // 分组名称，如 "Crash 游戏核心流程"
   description?: string;          // 分组说明
+  query?: string;                // 创建时的查询/上下文
   createdAt: string;             // ISO timestamp
   updatedAt: string;
   createdBy: 'ai' | 'user';

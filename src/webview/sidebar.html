@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src {{cspSource}} https://unpkg.com; font-src {{cspSource}};">
+  <title>MCP Bookmarks</title>
+  <link rel="stylesheet" href="{{codiconsUri}}">
+  <link rel="stylesheet" href="{{cssUri}}">
+</head>
+<body>
+  <div class="sidebar-container">
+    <!-- 书签列表容器 -->
+    <div id="bookmarks-container" class="bookmarks-container">
+      <!-- 加载状态 -->
+      <div id="loading-state" class="empty-state">
+        <span class="codicon codicon-loading codicon-modifier-spin"></span>
+        <span>Loading bookmarks...</span>
+      </div>
+
+      <!-- 空状态 -->
+      <div id="empty-state" class="empty-state" style="display: none;">
+        <span class="codicon codicon-bookmark"></span>
+        <span>No bookmarks yet</span>
+        <p class="empty-hint">Use AI to analyze code and create bookmarks</p>
+      </div>
+
+      <!-- 搜索无结果 -->
+      <div id="no-results-state" class="empty-state" style="display: none;">
+        <span class="codicon codicon-search"></span>
+        <span>No results found</span>
+      </div>
+
+      <!-- 分组列表 -->
+      <div id="groups-list" class="groups-list" style="display: none;">
+        <!-- 动态渲染 -->
+      </div>
+
+      <!-- 搜索结果 -->
+      <div id="search-results" class="search-results" style="display: none;">
+        <!-- 动态渲染 -->
+      </div>
+    </div>
+
+    <!-- 右键菜单 -->
+    <div id="context-menu" class="context-menu" style="display: none;">
+      <!-- 动态渲染 -->
+    </div>
+  </div>
+
+  <!-- Markdown 渲染库 -->
+  <script src="https://unpkg.com/marked@11.1.1/marked.min.js"></script>
+  <script src="https://unpkg.com/dompurify@3.0.8/dist/purify.min.js"></script>
+
+  <script src="{{jsUri}}"></script>
+</body>
+</html>

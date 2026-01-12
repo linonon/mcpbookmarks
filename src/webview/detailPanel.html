@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src {{cspSource}} 'unsafe-inline'; script-src {{cspSource}};">
+  <title>Bookmark Detail</title>
+  <link rel="stylesheet" href="{{cssUri}}">
+</head>
+<body>
+  <div class="container">
+    <!-- Header with title and actions -->
+    <div class="header">
+      <div class="title-section">
+        <h1 id="bookmark-title" class="title">Loading...</h1>
+        <span id="bookmark-order" class="order">#0</span>
+      </div>
+      <div class="actions">
+        <button id="btn-jump" class="btn btn-primary" title="Jump to code location">
+          <span class="codicon codicon-go-to-file"></span>
+          Jump to Code
+        </button>
+      </div>
+    </div>
+
+    <!-- Location card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="codicon codicon-file-code"></span>
+        <h3>Location</h3>
+      </div>
+      <div class="card-content">
+        <div class="location-display">
+          <code id="bookmark-location">-</code>
+          <button id="btn-copy-location" class="btn-icon" title="Copy location">
+            <span class="codicon codicon-copy"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Description card (核心: 多行显示区域) -->
+    <div class="card">
+      <div class="card-header">
+        <span class="codicon codicon-note"></span>
+        <h3>Description</h3>
+      </div>
+      <div class="card-content">
+        <div id="bookmark-description" class="description">
+          Loading description...
+        </div>
+      </div>
+    </div>
+
+    <!-- Category card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="codicon codicon-tag"></span>
+        <h3>Category</h3>
+      </div>
+      <div class="card-content">
+        <div id="bookmark-category" class="category-badge">
+          <span class="category-icon"></span>
+          <span class="category-label">-</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hierarchy card -->
+    <div class="card" id="hierarchy-card">
+      <div class="card-header">
+        <span class="codicon codicon-type-hierarchy"></span>
+        <h3>Hierarchy</h3>
+      </div>
+      <div class="card-content">
+        <!-- Parent bookmark -->
+        <div id="parent-section" class="hierarchy-section" style="display: none;">
+          <div class="hierarchy-label">
+            <span class="codicon codicon-arrow-up"></span>
+            <span>Parent</span>
+          </div>
+          <div id="parent-bookmark" class="bookmark-link">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- Children bookmarks -->
+        <div id="children-section" class="hierarchy-section" style="display: none;">
+          <div class="hierarchy-label">
+            <span class="codicon codicon-arrow-down"></span>
+            <span id="children-count">Children (0)</span>
+          </div>
+          <div id="children-list" class="children-list">
+            <!-- Will be populated by JS -->
+          </div>
+        </div>
+
+        <!-- No hierarchy message -->
+        <div id="no-hierarchy" class="no-data">
+          <span class="codicon codicon-info"></span>
+          <span>No parent or child bookmarks</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Group card -->
+    <div class="card">
+      <div class="card-header">
+        <span class="codicon codicon-folder"></span>
+        <h3>Group</h3>
+      </div>
+      <div class="card-content">
+        <div class="group-info">
+          <div class="group-name">
+            <span class="codicon codicon-folder-opened"></span>
+            <span id="group-name">-</span>
+          </div>
+          <div class="group-meta">
+            <span id="group-created-by" class="badge">-</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Metadata card (可折叠) -->
+    <details class="card collapsible">
+      <summary class="card-header">
+        <div class="summary-content">
+          <span class="codicon codicon-info"></span>
+          <h3>Metadata</h3>
+        </div>
+        <span class="codicon codicon-chevron-down toggle-icon"></span>
+      </summary>
+      <div class="card-content">
+        <div class="metadata-grid">
+          <div class="metadata-item">
+            <span class="metadata-label">ID:</span>
+            <span id="bookmark-id" class="metadata-value">-</span>
+          </div>
+        </div>
+      </div>
+    </details>
+  </div>
+
+  <script src="{{jsUri}}"></script>
+</body>
+</html>

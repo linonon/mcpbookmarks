@@ -1,0 +1,11 @@
+.vscode/**
+.vscode-test/**
+.claude/**
+.serena/**
+src/**
+node_modules/**
+.gitignore
+tsconfig.json
+Makefile
+*.md
+*.html

@@ -14,19 +14,11 @@ import { nowISO, parseLocation, normalizePath } from '../utils';
  * 包含所有 CRUD 逻辑, 子类只需实现 I/O 和通知机制.
  */
 export abstract class BookmarkStoreBase {
-  protected store!: BookmarkStore;
+  protected store: BookmarkStore;
   protected workspaceRoot: string;
 
   constructor(workspaceRoot: string) {
     this.workspaceRoot = workspaceRoot;
-    // 注意: 子类必须在自身构造函数中调用 this.initStore()
-    // 因为 TypeScript abstract class 构造函数中不能调用子类的 abstract 方法
-  }
-
-  /**
-   * 子类在构造函数中调用, 加载并初始化 store.
-   */
-  protected initStore(): void {
     this.store = this.loadFromDisk();
   }
 

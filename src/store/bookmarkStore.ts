@@ -103,13 +103,13 @@ export class BookmarkStoreManager extends BookmarkStoreBase {
 
     this.fileWatcher.onDidDelete(() => {
       this.store = createDefaultStore(path.basename(this.workspaceRoot));
-      this._onDidChange.fire();
+      this.notifyChange();
     });
   }
 
   private reload(): void {
     this.store = this.loadFromDisk();
-    this._onDidChange.fire();
+    this.notifyChange();
   }
 
   // --- VSCode 特有功能 ---

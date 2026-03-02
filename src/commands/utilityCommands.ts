@@ -192,9 +192,9 @@ export function registerUtilityCommands(
       }
 
       const targetGroupId = selectedGroup.detail!;
-      const success = store.moveBookmarkToGroup(bookmark.id, targetGroupId);
+      const result = store.moveBookmarkToGroup(bookmark.id, targetGroupId);
 
-      if (success) {
+      if (result.success) {
         vscode.window.showInformationMessage(
           `Bookmark "${bookmark.title}" moved to "${selectedGroup.label}"`
         );

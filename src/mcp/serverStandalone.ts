@@ -708,60 +708,7 @@ export class MCPServerStandalone {
     // Handle tool calls
     this.server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const { name, arguments: args } = request.params;
-
-      let result;
-      switch (name) {
-        case 'set_workspace':
-          result = this.handlers.setWorkspace(args as unknown as Parameters<MCPHandlersStandalone['setWorkspace']>[0]);
-          break;
-        case 'get_workspace':
-          result = this.handlers.getWorkspace();
-          break;
-        case 'create_group':
-          result = this.handlers.createGroup(args as unknown as Parameters<MCPHandlersStandalone['createGroup']>[0]);
-          break;
-        case 'add_bookmark':
-          result = this.handlers.addBookmark(args as unknown as Parameters<MCPHandlersStandalone['addBookmark']>[0]);
-          break;
-        case 'list_groups':
-          result = this.handlers.listGroups(args as unknown as Parameters<MCPHandlersStandalone['listGroups']>[0]);
-          break;
-        case 'list_bookmarks':
-          result = this.handlers.listBookmarks(args as unknown as Parameters<MCPHandlersStandalone['listBookmarks']>[0]);
-          break;
-        case 'update_group':
-          result = this.handlers.updateGroup(args as unknown as Parameters<MCPHandlersStandalone['updateGroup']>[0]);
-          break;
-        case 'update_bookmark':
-          result = this.handlers.updateBookmark(args as unknown as Parameters<MCPHandlersStandalone['updateBookmark']>[0]);
-          break;
-        case 'remove_bookmark':
-          result = this.handlers.removeBookmark(args as unknown as Parameters<MCPHandlersStandalone['removeBookmark']>[0]);
-          break;
-        case 'remove_group':
-          result = this.handlers.removeGroup(args as unknown as Parameters<MCPHandlersStandalone['removeGroup']>[0]);
-          break;
-        case 'get_group':
-          result = this.handlers.getGroup(args as unknown as Parameters<MCPHandlersStandalone['getGroup']>[0]);
-          break;
-        case 'get_bookmark':
-          result = this.handlers.getBookmark(args as unknown as Parameters<MCPHandlersStandalone['getBookmark']>[0]);
-          break;
-        case 'add_child_bookmark':
-          result = this.handlers.addChildBookmark(args as unknown as Parameters<MCPHandlersStandalone['addChildBookmark']>[0]);
-          break;
-        case 'get_bookmark_tree':
-          result = this.handlers.getBookmarkTree(args as unknown as Parameters<MCPHandlersStandalone['getBookmarkTree']>[0]);
-          break;
-        case 'batch_add_bookmarks':
-          result = this.handlers.batchAddBookmarks(args as unknown as Parameters<MCPHandlersStandalone['batchAddBookmarks']>[0]);
-          break;
-        case 'batch_remove_bookmarks':
-          result = this.handlers.batchRemoveBookmarks(args as unknown as Parameters<MCPHandlersStandalone['batchRemoveBookmarks']>[0]);
-          break;
-        default:
-          result = { success: false, error: `Unknown tool: ${name}` };
-      }
+      const result = this.handlers.handle(name, args);
 
       return {
         content: [

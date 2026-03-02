@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import { BookmarkStoreManager } from '../store/bookmarkStore';
 import { BookmarkSidebarProvider } from '../providers/sidebarProvider';
 import { DecorationProvider } from '../providers/decorationProvider';

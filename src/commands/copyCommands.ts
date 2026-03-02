@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
-import { Bookmark, BookmarkGroup } from '../store/types';
 import { extractBookmark, extractGroup } from '../shared/itemHelpers';
 import { CommandDependencies } from './types';
 
